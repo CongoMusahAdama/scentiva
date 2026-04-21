@@ -1,8 +1,9 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect } from "react";
+import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { CheckCircle2 } from "lucide-react";
+import { CheckCircle2, ShoppingBag } from "lucide-react";
 
 export type CartItem = {
   id: string;
@@ -11,6 +12,12 @@ export type CartItem = {
   image: string;
   quantity: number;
 };
+
+type CartToastData = {
+  name: string;
+  image: string;
+  price: number;
+} | null;
 
 type CartContextType = {
   cart: CartItem[];
@@ -22,6 +29,7 @@ type CartContextType = {
   setIsCartOpen: (isOpen: boolean) => void;
   toast: string | null;
   showToast: (msg: string) => void;
+  showCartToast: (product: { name: string; image: string; price: number }) => void;
   totalItems: number;
   totalPrice: number;
 };
@@ -32,11 +40,19 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   const [cart, setCart] = useState<CartItem[]>([]);
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const [cartToast, setCartToast] = useState<CartToastData>(null);
   const [isAnimating, setIsAnimating] = useState(false);
 
+  // Plain text toast (kept for any other use)
   const showToast = (msg: string) => {
     setToast(msg);
     setTimeout(() => setToast(null), 3000);
+  };
+
+  // Rich product toast
+  const showCartToast = (product: { name: string; image: string; price: number }) => {
+    setCartToast(product);
+    setTimeout(() => setCartToast(null), 3500);
   };
 
   // Load cart from localStorage
@@ -57,7 +73,6 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   }, [cart]);
 
   const addToCart = (product: any) => {
-    // Trigger flying animation
     setIsAnimating(true);
     setTimeout(() => setIsAnimating(false), 2000);
 
@@ -104,7 +119,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   return (
     <CartContext.Provider value={{ 
       cart, addToCart, removeFromCart, updateQuantity, clearCart, 
-      isCartOpen, setIsCartOpen, toast, showToast, totalItems, totalPrice 
+      isCartOpen, setIsCartOpen, toast, showToast, showCartToast, totalItems, totalPrice 
     }}>
       {children}
 
@@ -136,10 +151,74 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
         )}
       </AnimatePresence>
 
-      {/* Global Toast Notification */}
+      {/* ── Rich Cart Toast (product added) ── */}
+      <AnimatePresence>
+        {cartToast && (
+          <motion.div
+            key="cart-toast"
+            initial={{ opacity: 0, y: 100, scale: 0.92 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: 60, scale: 0.95 }}
+            transition={{ type: "spring", stiffness: 380, damping: 28 }}
+            className="fixed bottom-6 left-4 right-4 md:left-auto md:right-6 md:w-80 z-[400] pointer-events-none"
+          >
+            <div className="relative bg-[#0f0f12] border border-parchment/15 rounded-2xl p-3.5 shadow-[0_8px_40px_rgba(0,0,0,0.6)] overflow-hidden flex items-center gap-3.5">
+              {/* Gold shimmer bar at top */}
+              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-gold-oud to-transparent" />
+
+              {/* Product thumbnail */}
+              <div className="relative w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 border border-parchment/10">
+                <Image
+                  src={cartToast.image}
+                  alt={cartToast.name}
+                  fill
+                  className="object-cover"
+                />
+              </div>
+
+              {/* Text */}
+              <div className="flex-1 min-w-0">
+                <div className="flex items-center gap-1.5 mb-0.5">
+                  <ShoppingBag size={11} className="text-emerald-400 flex-shrink-0" />
+                  <p className="text-[10px] text-emerald-400 uppercase tracking-[0.18em] font-bold">
+                    Added to Bag
+                  </p>
+                </div>
+                <p className="text-sm font-serif text-parchment leading-snug truncate">
+                  {cartToast.name}
+                </p>
+                <p className="text-xs text-gold-oud font-bold mt-0.5">
+                  GH₵ {cartToast.price}
+                </p>
+              </div>
+
+              {/* Animated check */}
+              <motion.div
+                initial={{ scale: 0, rotate: -30 }}
+                animate={{ scale: 1, rotate: 0 }}
+                transition={{ type: "spring", stiffness: 500, damping: 22, delay: 0.15 }}
+                className="flex-shrink-0"
+              >
+                <CheckCircle2 size={26} className="text-emerald-400" />
+              </motion.div>
+
+              {/* Auto-dismiss progress bar */}
+              <motion.div
+                initial={{ scaleX: 1 }}
+                animate={{ scaleX: 0 }}
+                transition={{ duration: 3.5, ease: "linear" }}
+                className="absolute bottom-0 left-0 right-0 h-[2px] bg-gold-oud/40 origin-left"
+              />
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Plain text toast (kept for backward compatibility) */}
       <AnimatePresence>
         {toast && (
           <motion.div
+            key="plain-toast"
             initial={{ opacity: 0, y: 50, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
