@@ -193,7 +193,7 @@ export default function OrdersPage() {
       </AdminCard>
 
       {/* Order Detail Modal */}
-      <AdminModal open={!!detail} onClose={() => setDetail(null)} title={`Order ${detail?.id}`} width="480px">
+      <AdminModal open={!!detail} onClose={() => setDetail(null)} title={detail ? `Order ${detail.id}` : "Order Details"} width="480px">
         {detail && (
           <div className="flex flex-col gap-4">
             {[

@@ -8,6 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 const pageTitles: Record<AdminPage, string> = {
   dashboard: "Dashboard", products: "Products", orders: "Orders",
   customers: "Customers", reviews: "Reviews", referrals: "Referrals", settings: "Settings",
+  receipts: "Receipts",
 };
 const pageSubtitles: Record<AdminPage, string> = {
   dashboard: "Overview & key metrics",
@@ -17,6 +18,7 @@ const pageSubtitles: Record<AdminPage, string> = {
   reviews: "Approve or reject customer feedback",
   referrals: "Monitor referral activity and rewards",
   settings: "Configure your store settings",
+  receipts: "Generate and manage customer receipts",
 };
 
 export default function AdminNavbar() {

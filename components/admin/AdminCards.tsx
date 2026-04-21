@@ -42,10 +42,10 @@ interface AdminCardProps {
   children: ReactNode;
   className?: string;
   action?: ReactNode;
-  noPad?: boolean;
+  noPadding?: boolean;
 }
 
-export function AdminCard({ title, children, className = "", action, noPad }: AdminCardProps) {
+export function AdminCard({ title, children, className = "", action, noPadding }: AdminCardProps) {
   return (
     <div
       className={`${className}`}
@@ -62,7 +62,7 @@ export function AdminCard({ title, children, className = "", action, noPad }: Ad
           {action && <div>{action}</div>}
         </div>
       )}
-      <div className={noPad ? "" : "p-5"}>{children}</div>
+      <div className={noPadding ? "" : "p-5"}>{children}</div>
     </div>
   );
 }

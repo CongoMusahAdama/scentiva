@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import { Users, TrendingUp, Gift, CreditCard, ChevronRight } from "lucide-react";
 import { AdminCard } from "@/components/admin/AdminCards";
 import { Badge, AdminPagination, AdminButton, AdminTable, AdminMobileCard } from "@/components/admin/AdminUI";

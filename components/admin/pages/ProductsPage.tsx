@@ -263,7 +263,7 @@ export default function ProductsPage() {
             <AdminInput label="Perfect Occasion" value={form.bestFor} onChange={(val) => setForm((f) => ({ ...f, bestFor: val }))} placeholder="e.g. Office Wear" />
           </div>
           <div className="grid grid-cols-3 gap-4">
-            <AdminInput label="Stock Quantity" type="number" value={form.stock} onChange={(val) => setForm((f) => ({ ...f, stock: Number(val) }))} />
+            <AdminInput label="Stock Quantity" type="number" value={form.stock.toString()} onChange={(val) => setForm((f) => ({ ...f, stock: Number(val) }))} />
             <AdminSelect 
               label="Inventory Status" 
               value={form.status} 

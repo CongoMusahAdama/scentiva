@@ -173,7 +173,7 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
         {/* Main Tabbed Card */}
         <div className="lg:col-span-8 flex flex-col gap-5">
-          <AdminCard noPad>
+          <AdminCard noPadding>
             {/* Header / Tab Switcher */}
             <div className="flex flex-col sm:flex-row items-center justify-between px-5 py-4 border-b border-[#F0F1F4] gap-4">
               <div className="flex items-center gap-6">

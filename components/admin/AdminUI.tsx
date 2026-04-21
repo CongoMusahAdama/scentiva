@@ -151,7 +151,8 @@ export function AdminButton({
   icon,
   className,
   disabled,
-  type = "button"
+  type = "button",
+  style
 }: { 
   children: ReactNode; 
   onClick?: () => void; 
@@ -161,6 +162,7 @@ export function AdminButton({
   className?: string;
   disabled?: boolean;
   type?: "button" | "submit" | "reset";
+  style?: React.CSSProperties;
 }) {
   const variants = {
     primary: "bg-[#D8B34B] text-white hover:bg-[#B8942A]",
@@ -182,7 +184,7 @@ export function AdminButton({
       onClick={onClick}
       disabled={disabled}
       className={`inline-flex items-center justify-center gap-2 font-poppins font-bold tracking-widest uppercase transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${variants[variant]} ${sizes[size]} ${className || ""}`}
-      style={{ borderRadius: "0px" }}
+      style={{ borderRadius: "0px", ...style }}
     >
       {icon && <span className="shrink-0">{icon}</span>}
       {children}
