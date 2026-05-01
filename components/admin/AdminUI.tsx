@@ -54,11 +54,11 @@ export function AdminTable({
       <div className={`${mobileCards ? 'hidden lg:block' : 'block'} overflow-x-auto custom-scrollbar`}>
         <table className="w-full border-collapse">
           <thead>
-            <tr className="bg-[#F8F9FA] border-b border-[#F0F1F4]">
+            <tr style={{ backgroundColor: "#D8B34B" }}>
               {headers.map((h, i) => (
                 <th
                   key={i}
-                  className="px-6 py-5 text-left font-poppins text-[10px] font-bold text-[#9CA3AF] uppercase tracking-[.2em]"
+                  className="px-6 py-4 text-left font-poppins text-[10px] font-bold text-white uppercase tracking-[.2em]"
                 >
                   {h}
                 </th>
@@ -324,6 +324,7 @@ export function AdminModal({
   onClose, 
   title, 
   children,
+  footer,
   width = "670px" 
 }: { 
   isOpen?: boolean; 
@@ -331,6 +332,7 @@ export function AdminModal({
   onClose: () => void; 
   title: string; 
   children: ReactNode;
+  footer?: ReactNode;
   width?: string;
 }) {
   const isModalOpen = isOpen || open;
@@ -350,10 +352,10 @@ export function AdminModal({
             initial={{ opacity: 0, scale: 0.95, y: 20 }}
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.95, y: 20 }}
-            className="relative bg-white w-full shadow-3xl overflow-hidden"
-            style={{ borderRadius: "0px", maxWidth: width }}
+            className="relative bg-white w-full shadow-3xl overflow-hidden flex flex-col"
+            style={{ borderRadius: "0px", maxWidth: width, maxHeight: "90vh" }}
           >
-            <div className="px-6 py-5 md:px-10 md:py-8 border-b border-[#F0F1F4] flex items-center justify-between">
+            <div className="px-6 py-5 md:px-10 md:py-8 border-b border-[#F0F1F4] flex items-center justify-between shrink-0">
               <h2 className="font-lora font-bold text-[18px] md:text-[22px] text-[#1A1B23] tracking-widest uppercase">{title}</h2>
               <button 
                 onClick={onClose} 
@@ -362,15 +364,23 @@ export function AdminModal({
                 ×
               </button>
             </div>
-            <div className="px-6 py-8 md:px-10 md:py-10 max-h-[80vh] overflow-y-auto custom-scrollbar">
+            
+            <div className="px-6 py-8 md:px-10 md:py-10 overflow-y-auto custom-scrollbar flex-1">
               {children}
             </div>
+
+            {footer && (
+              <div className="px-6 py-5 md:px-10 md:py-6 border-t border-[#F0F1F4] bg-white shrink-0">
+                {footer}
+              </div>
+            )}
           </motion.div>
         </div>
       )}
     </AnimatePresence>
   );
 }
+
 
 // --- PAGINATION ---
 export function AdminPagination({ 

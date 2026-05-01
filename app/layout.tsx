@@ -35,7 +35,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className={`${lora.variable} ${poppins.variable} antialiased`}>
-      <body className="bg-[#0D0D0F] text-[#FFF4DE] font-sans">
+      <body className="bg-[#0D0D0F] text-[#FFF4DE] font-sans" suppressHydrationWarning>
         <StoreProviders>{children}</StoreProviders>
       </body>
     </html>

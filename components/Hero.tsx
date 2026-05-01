@@ -57,14 +57,17 @@ const Hero = () => {
               transition={{ delay: 1, duration: 0.8 }}
             >
               <div className="flex flex-row gap-4 pt-10">
-                <button className="px-8 py-4 bg-gold-oud text-deep-noir text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-parchment transition-all duration-500 shadow-2xl">
-                  Shop Now
+                <button 
+                  onClick={() => document.getElementById('scent-assistant')?.scrollIntoView({ behavior: 'smooth' })}
+                  className="px-8 py-4 bg-gold-oud text-deep-noir text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-parchment transition-all duration-500 shadow-2xl"
+                >
+                  Find Your Scent
                 </button>
                 <button 
                   onClick={() => document.getElementById('categories')?.scrollIntoView({ behavior: 'smooth' })}
                   className="px-8 py-4 bg-transparent border border-parchment/20 text-parchment text-[10px] font-bold uppercase tracking-[0.2em] hover:bg-parchment/5 hover:border-parchment/40 transition-all duration-500"
                 >
-                  Products
+                  Explore Shop
                 </button>
               </div>
             </motion.div>
@@ -72,15 +75,7 @@ const Hero = () => {
         </div>
       </div>
 
-      {/* Scroll indicator */}
-      <motion.div 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ delay: 1.5, duration: 1 }}
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2"
-      >
-        <div className="w-[1px] h-12 bg-gradient-to-b from-gold-oud/60 to-transparent" />
-      </motion.div>
+
     </section>
   );
 };

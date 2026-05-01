@@ -291,7 +291,7 @@ export default function ShopContent() {
                         onClick={() => setSelectedProduct(product)}
                       >
                         <div className="relative aspect-[3/4] overflow-hidden bg-white/5 mb-4">
-                          <Image src={product.image} alt={product.name} fill className="object-cover transition-transform duration-700 group-hover:scale-110" />
+                          <Image src={product.image} alt={product.name} fill className={`object-cover transition-transform duration-700 group-hover:scale-110 ${product.status === "sold-out" ? "grayscale opacity-80" : ""}`} />
                           <div className="absolute inset-0 bg-deep-noir/25 group-hover:bg-deep-noir/5 transition-colors duration-500" />
 
                           {/* Category badge */}
@@ -301,17 +301,22 @@ export default function ShopContent() {
                             </span>
                           </div>
 
-                          {/* Discount badge */}
-                          <div className="absolute top-3 right-3">
-                            <span className="bg-gold-oud text-deep-noir text-[9px] font-bold px-2 py-0.5 rounded-sm">
+                          {/* Discount & Sold Out badges */}
+                          <div className="absolute top-3 right-3 flex flex-col items-end gap-2">
+                            <span className="bg-gold-oud text-deep-noir text-[9px] font-bold px-2 py-0.5 rounded-sm shadow-md">
                               -{discount}%
                             </span>
+                            {product.status === "sold-out" && (
+                              <span className="bg-rose-600 text-white text-[9px] font-bold px-2 py-0.5 rounded-sm uppercase tracking-widest shadow-md">
+                                Sold Out
+                              </span>
+                            )}
                           </div>
 
                           {/* Hover overlay */}
                           <div className="absolute inset-0 flex flex-col items-center justify-end p-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                             <div className="w-full bg-parchment/95 text-deep-noir py-3 text-[10px] font-bold uppercase tracking-widest flex items-center justify-center gap-2 shadow-2xl">
-                              Order via WhatsApp
+                              {product.status === "sold-out" ? "Pre-order on WhatsApp" : "Order via WhatsApp"}
                             </div>
                             <div className="mt-2 text-[8px] text-white/40 uppercase tracking-[0.2em] font-medium">WhatsApp Orders Only</div>
                           </div>

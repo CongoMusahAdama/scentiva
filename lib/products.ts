@@ -43,6 +43,7 @@ export const allProducts: Product[] = [
   {
     id: "SA-004", name: "Amber & Woods", actual: 340, original: 400,
     tag: "Men's Perfume", category: "mens", image: "/perfum4.jpg",
+    status: "sold-out",
     desc: "Warm amber and rich sandalwood for the modern gentleman.",
     perfectOccasion: "Business Meetings",
     pros: [ "Warm and inviting", "Long-lasting amber", "Conveys confidence", "Barbershop signature" ],

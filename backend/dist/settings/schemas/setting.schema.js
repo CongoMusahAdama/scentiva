@@ -1,0 +1,58 @@
+"use strict";
+var __decorate = (this && this.__decorate) || function (decorators, target, key, desc) {
+    var c = arguments.length, r = c < 3 ? target : desc === null ? desc = Object.getOwnPropertyDescriptor(target, key) : desc, d;
+    if (typeof Reflect === "object" && typeof Reflect.decorate === "function") r = Reflect.decorate(decorators, target, key, desc);
+    else for (var i = decorators.length - 1; i >= 0; i--) if (d = decorators[i]) r = (c < 3 ? d(r) : c > 3 ? d(target, key, r) : d(target, key)) || r;
+    return c > 3 && r && Object.defineProperty(target, key, r), r;
+};
+var __metadata = (this && this.__metadata) || function (k, v) {
+    if (typeof Reflect === "object" && typeof Reflect.metadata === "function") return Reflect.metadata(k, v);
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.SettingSchema = exports.Setting = void 0;
+const mongoose_1 = require("@nestjs/mongoose");
+const mongoose_2 = require("mongoose");
+let Setting = class Setting extends mongoose_2.Document {
+};
+exports.Setting = Setting;
+__decorate([
+    (0, mongoose_1.Prop)({ required: true, default: 'Scentiva Aura' }),
+    __metadata("design:type", String)
+], Setting.prototype, "storeName", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ required: true, default: 'Own your scent.' }),
+    __metadata("design:type", String)
+], Setting.prototype, "tagline", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ required: true, default: 'hello@scentivaaura.com' }),
+    __metadata("design:type", String)
+], Setting.prototype, "email", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ required: true, default: '050 915 4727' }),
+    __metadata("design:type", String)
+], Setting.prototype, "whatsapp", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ required: true, default: '@scentivaaura' }),
+    __metadata("design:type", String)
+], Setting.prototype, "socialHandle", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ required: true, default: 'Takoradi, Ghana' }),
+    __metadata("design:type", String)
+], Setting.prototype, "address", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ required: true, default: 'GHS' }),
+    __metadata("design:type", String)
+], Setting.prototype, "currency", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ required: true, default: 'Orders are processed within 24 hours and delivered in 1–3 business days.' }),
+    __metadata("design:type", String)
+], Setting.prototype, "deliveryNote", void 0);
+__decorate([
+    (0, mongoose_1.Prop)({ required: true, default: '10' }),
+    __metadata("design:type", String)
+], Setting.prototype, "referralReward", void 0);
+exports.Setting = Setting = __decorate([
+    (0, mongoose_1.Schema)({ timestamps: true })
+], Setting);
+exports.SettingSchema = mongoose_1.SchemaFactory.createForClass(Setting);
+//# sourceMappingURL=setting.schema.js.map

@@ -3,18 +3,34 @@
 import { useState } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
-import { Phone, Lock, ArrowRight, ChevronLeft } from "lucide-react";
+import { Phone, Lock, ArrowRight, ChevronLeft, Loader2 } from "lucide-react";
+import Swal from "sweetalert2";
 import Image from "next/image";
+import { useAuth } from "@/context/AuthContext";
 
 export default function SigninPage() {
+  const { login } = useAuth();
   const [formData, setFormData] = useState({
     phone: "",
     password: "",
   });
+  const [loading, setLoading] = useState(false);
 
-  const handleSignin = (e: React.FormEvent) => {
+  const handleSignin = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Signing in with:", formData);
+    setLoading(true);
+    try {
+      await login(formData.phone, formData.password);
+    } catch (err: any) {
+      Swal.fire({
+        icon: 'error',
+        title: 'Authentication Failed',
+        text: err.message || "Invalid credentials",
+        confirmButtonColor: '#1A1B23'
+      });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -65,13 +81,14 @@ export default function SigninPage() {
             </div>
 
             <form onSubmit={handleSignin} className="space-y-6">
+              
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-[#1A1B23]/40 uppercase tracking-[0.2em] ml-1">WhatsApp Number</label>
+                <label className="text-[10px] font-bold text-[#1A1B23]/40 uppercase tracking-[0.2em] ml-1">Email or WhatsApp</label>
                 <div className="relative group">
-                  <Phone className="absolute left-0 top-1/2 -translate-y-1/2 text-[#D8B34B] transition-colors" size={18} />
+                   <Phone className="absolute left-0 top-1/2 -translate-y-1/2 text-[#D8B34B] transition-colors" size={18} />
                   <input 
-                    type="tel"
-                    placeholder="+233 24 000 0000"
+                    type="text"
+                    placeholder="amara@example.com or +233..."
                     value={formData.phone}
                     onChange={(e) => setFormData({...formData, phone: e.target.value})}
                     className="w-full pl-8 pr-4 py-3 bg-transparent border-b border-[#F0F1F4] focus:border-[#1A1B23] outline-none text-[15px] transition-colors font-medium text-[#1A1B23]"
@@ -100,9 +117,14 @@ export default function SigninPage() {
 
               <button 
                 type="submit"
-                className="w-full mt-8 bg-[#1A1B23] text-white py-4 rounded-full text-xs font-bold uppercase tracking-[0.3em] flex items-center justify-center gap-3 hover:bg-[#2A2B35] transition-all group shadow-xl"
+                disabled={loading}
+                className="w-full mt-8 bg-[#1A1B23] text-white py-4 rounded-full text-xs font-bold uppercase tracking-[0.3em] flex items-center justify-center gap-3 hover:bg-[#2A2B35] disabled:opacity-50 transition-all group shadow-xl"
               >
-                Sign In <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
+                {loading ? (
+                  <Loader2 className="animate-spin" size={16} />
+                ) : (
+                  <>Sign In <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" /></>
+                )}
               </button>
             </form>
 

@@ -5,27 +5,57 @@ import { Save, AlertTriangle, ShieldCheck } from "lucide-react";
 import { AdminCard } from "@/components/admin/AdminUI";
 import { AdminButton, AdminInput, AdminTextarea } from "@/components/admin/AdminUI";
 import { showSuccess, showConfirm, showError } from "@/lib/swal";
+import { SettingService } from "@/lib/services/setting.service";
+import { useEffect } from "react";
 
 export default function SettingsPage() {
   const [form, setForm] = useState({
     storeName: "Scentiva Aura",
     tagline: "Own your scent.",
     email: "hello@scentivaaura.com",
-    whatsapp: "+233 55 000 0000",
-    instagram: "@scentivaaura",
-    address: "Accra, Ghana",
+    whatsapp: "050 915 4727",
+    socialHandle: "@scentivaaura",
+    address: "Takoradi, Ghana",
     currency: "GHS",
     deliveryNote: "Orders are processed within 24 hours and delivered in 1–3 business days.",
     referralReward: "10",
   });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    SettingService.getSettings()
+      .then((data) => {
+        setForm({
+          storeName: data.storeName || "",
+          tagline: data.tagline || "",
+          email: data.email || "",
+          whatsapp: data.whatsapp || "",
+          socialHandle: data.socialHandle || "",
+          address: data.address || "",
+          currency: data.currency || "GHS",
+          deliveryNote: data.deliveryNote || "",
+          referralReward: data.referralReward || "10",
+        });
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error(err);
+        showError("Sync Failed", "Could not load settings from backend.");
+        setLoading(false);
+      });
+  }, []);
 
   const updateField = (k: keyof typeof form, val: string) => {
     setForm((f) => ({ ...f, [k]: val }));
   };
 
   const handleSave = async () => {
-    // Simulate API call
-    showSuccess("Settings Saved", "Your store configuration has been updated successfully.");
+    try {
+      await SettingService.updateSettings(form);
+      showSuccess("Settings Saved", "Your store configuration has been updated and synced to the cloud successfully.");
+    } catch (err) {
+      showError("Save Failed", "Could not sync settings to backend.");
+    }
   };
 
   const handleDangerAction = async (action: string) => {
@@ -39,6 +69,10 @@ export default function SettingsPage() {
       showSuccess("Action Successful", "The requested operation has been completed.");
     }
   };
+
+  if (loading) {
+    return <div className="text-sm text-gray-500 animate-pulse">Loading settings from secure cloud...</div>;
+  }
 
   return (
     <div className="flex flex-col gap-6 max-w-6xl">
@@ -97,8 +131,8 @@ export default function SettingsPage() {
           <AdminCard title="Communication & Support">
             <div className="flex flex-col gap-5">
               <AdminInput label="Public Support Email" value={form.email} onChange={(val) => updateField("email", val)} type="email" />
-              <AdminInput label="Official WhatsApp Number" value={form.whatsapp} onChange={(val) => updateField("whatsapp", val)} placeholder="+233 XX XXX XXXX" />
-              <AdminInput label="Instagram Business Handle" value={form.instagram} onChange={(val) => updateField("instagram", val)} />
+              <AdminInput label="Official WhatsApp Number" value={form.whatsapp} onChange={(val) => updateField("whatsapp", val)} placeholder="050 XXX XXXX" />
+              <AdminInput label="Social Media Handle (IG, FB, TikTok)" value={form.socialHandle} onChange={(val) => updateField("socialHandle", val)} />
               <AdminTextarea label="Physical Address" value={form.address} onChange={(val) => updateField("address", val)} rows={2} />
             </div>
           </AdminCard>

@@ -6,11 +6,15 @@ import { AdminCard } from "@/components/admin/AdminCards";
 import { AdminButton, AdminInput, AdminSelect } from "@/components/admin/AdminUI";
 import { allProducts } from "@/lib/products";
 import Image from "next/image";
-import { showSuccess } from "@/lib/swal";
+import { showSuccess, showError } from "@/lib/swal";
+import html2canvas from "html2canvas";
+import jsPDF from "jspdf";
+import QRCode from "react-qr-code";
 
 export default function ReceiptsPage() {
   const [form, setForm] = useState({
     customerName: "",
+    location: "",
     productId: allProducts[0].id,
     paymentMethod: "M-Pesa / Mobile Money",
     amount: allProducts[0].actual.toString(),
@@ -23,7 +27,10 @@ export default function ReceiptsPage() {
   const selectedProduct = allProducts.find(p => p.id === form.productId) || allProducts[0];
 
   const handleGenerate = () => {
-    if (!form.customerName) return alert("Please enter customer name");
+    if (!form.customerName) {
+      showError("Validation Error", "Please enter customer name");
+      return;
+    }
     setGenerated(true);
     showSuccess("Receipt Generated", "The receipt has been successfully created and is ready for the customer.");
   };
@@ -32,18 +39,48 @@ export default function ReceiptsPage() {
     window.print();
   };
 
+  const handleDownloadPDF = async () => {
+    const element = document.getElementById("printable-receipt");
+    if (!element) return;
+    
+    try {
+      const canvas = await html2canvas(element, { scale: 2 });
+      const imgData = canvas.toDataURL("image/jpeg", 1.0);
+      const pdf = new jsPDF("p", "mm", "a4");
+      
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+      
+      pdf.addImage(imgData, "JPEG", 0, 0, pdfWidth, pdfHeight);
+      const safeCustomerName = form.customerName.replace(/[^a-zA-Z0-9]/g, "_");
+      pdf.save(`${safeCustomerName}_${form.productId}_Receipt.pdf`);
+      showSuccess("Success", "Receipt downloaded successfully!");
+    } catch (error) {
+      console.error(error);
+      showError("Download Failed", "There was an error generating the PDF.");
+    }
+  };
+
   return (
     <div className="flex flex-col gap-6 max-w-5xl">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
         {/* Form */}
         <AdminCard title="Generate New Receipt">
           <div className="flex flex-col gap-4">
-            <AdminInput 
-              label="Customer Name" 
-              value={form.customerName} 
-              onChange={(val) => setForm({ ...form, customerName: val })}
-              placeholder="e.g. John Doe"
-            />
+            <div className="grid grid-cols-2 gap-4">
+              <AdminInput 
+                label="Customer Name" 
+                value={form.customerName} 
+                onChange={(val) => setForm({ ...form, customerName: val })}
+                placeholder="e.g. John Doe"
+              />
+              <AdminInput 
+                label="Location (Optional)" 
+                value={form.location} 
+                onChange={(val) => setForm({ ...form, location: val })}
+                placeholder="e.g. East Legon"
+              />
+            </div>
             <AdminSelect 
               label="Select Product"
               value={form.productId}
@@ -83,6 +120,7 @@ export default function ReceiptsPage() {
                 <p style={{ fontSize: "12px", color: "#6B7280", fontWeight: 500 }}>Live Preview</p>
                 <div className="flex gap-2">
                    <AdminButton variant="secondary" size="sm" onClick={handlePrint}><Printer size={14}/> Print</AdminButton>
+                   <AdminButton variant="primary" size="sm" onClick={handleDownloadPDF}><Download size={14}/> Download PDF</AdminButton>
                 </div>
              </div>
 
@@ -99,8 +137,8 @@ export default function ReceiptsPage() {
                }}
              >
                 {/* Logo Watermark */}
-                <div className="absolute inset-0 flex items-center justify-center opacity-[0.025] pointer-events-none select-none z-0">
-                   <div style={{ position: "relative", width: "100%", height: "100%", maxWidth: "450px", maxHeight: "450px" }}>
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none select-none z-0" style={{ opacity: 0.12 }}>
+                   <div style={{ position: "relative", width: "80%", height: "80%" }}>
                       <Image 
                         src="/01_primary_logo_transparent.png" 
                         alt="watermark" 
@@ -110,7 +148,6 @@ export default function ReceiptsPage() {
                       />
                    </div>
                 </div>
-
                 {/* Content */}
                 <div className="relative z-10 flex flex-col h-full">
                    {/* Header */}
@@ -128,17 +165,17 @@ export default function ReceiptsPage() {
                    </div>
 
                    {/* Info */}
-                   <div className="grid grid-cols-2 gap-8 mb-12">
-                      <div>
-                        <p style={{ fontSize: "10px", color: "#9CA3AF", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "4px" }}>Billed To</p>
-                        <p style={{ fontSize: "14px", color: "#1A1B23", fontWeight: 700 }}>{form.customerName}</p>
-                        <p style={{ fontSize: "12px", color: "#6B7280" }}>Accra, Ghana</p>
-                      </div>
-                      <div className="text-right">
-                        <p style={{ fontSize: "10px", color: "#9CA3AF", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "4px" }}>Date Issued</p>
-                        <p style={{ fontSize: "14px", color: "#1A1B23", fontWeight: 700 }}>{form.date}</p>
-                      </div>
-                   </div>
+                    <div className="grid grid-cols-2 gap-8 mb-12">
+                       <div>
+                         <p style={{ fontSize: "10px", color: "#9CA3AF", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "4px" }}>Billed To</p>
+                         <p style={{ fontSize: "14px", color: "#1A1B23", fontWeight: 700 }}>{form.customerName}</p>
+                         <p style={{ fontSize: "12px", color: "#6B7280" }}>{form.location || "Accra, Ghana"}</p>
+                       </div>
+                       <div className="text-right">
+                         <p style={{ fontSize: "10px", color: "#9CA3AF", textTransform: "uppercase", letterSpacing: "0.1em", marginBottom: "4px" }}>Date Issued</p>
+                         <p style={{ fontSize: "14px", color: "#1A1B23", fontWeight: 700 }}>{form.date}</p>
+                       </div>
+                    </div>
 
                    {/* Table */}
                    <div className="flex-1">
@@ -177,17 +214,26 @@ export default function ReceiptsPage() {
                       </div>
                    </div>
 
-                   {/* Footer */}
-                   <div className="mt-12 text-center">
-                      <div className="inline-flex items-center gap-2 mb-3">
-                         <CheckCircle2 size={16} className="text-emerald-500" />
-                         <span style={{ fontSize: "12px", color: "#059669", fontWeight: 600 }}>Successfully Paid</span>
-                      </div>
-                      <p style={{ fontFamily: "var(--font-lora, serif)", fontSize: "14px", color: "#1A1B23", fontStyle: "italic" }}>
-                        "Thank you for choosing Scentiva Aura. May your essence always be captivating."
-                      </p>
-                      <p style={{ fontSize: "10px", color: "#9CA3AF", marginTop: "16px" }}>scentivaaura.com • Accra, Ghana</p>
-                   </div>
+                    {/* Footer */}
+                    <div className="mt-8 text-center flex flex-col items-center">
+                       <div className="inline-flex items-center gap-2 mb-3">
+                          <CheckCircle2 size={16} className="text-emerald-500" />
+                          <span style={{ fontSize: "12px", color: "#059669", fontWeight: 600 }}>Successfully Paid</span>
+                       </div>
+                       
+                       <div className="my-3 opacity-100 border border-parchment/20 p-2 bg-white rounded-md shadow-sm">
+                          <QRCode 
+                            value={`Receipt: ${form.receiptNumber} | Amount: GHS ${form.amount} | Date: ${form.date} | Store: Scentiva`} 
+                            size={76}
+                            level="H"
+                          />
+                       </div>
+
+                       <p style={{ fontFamily: "var(--font-lora, serif)", fontSize: "14px", color: "#1A1B23", fontStyle: "italic", marginTop: "8px" }}>
+                         "Thank you for choosing Scentiva Aura. May your essence always be captivating."
+                       </p>
+                       <p style={{ fontSize: "10px", color: "#9CA3AF", marginTop: "12px" }}>scentivaaura.com • Accra, Ghana</p>
+                    </div>
                 </div>
              </div>
           </div>

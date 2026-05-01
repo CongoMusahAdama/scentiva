@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { 
   X, CheckCircle2, Clock, ShoppingCart, 
@@ -8,6 +8,7 @@ import {
   Sunrise, Dumbbell, Backpack, Scissors, PartyPopper, ShoppingBag, Gift, MessageCircle 
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import { useAuth } from "@/context/AuthContext";
 
 const iconMap: Record<string, React.ElementType> = {
   Moon, Heart, Landmark, Sun, GraduationCap, Briefcase, 
@@ -27,6 +28,8 @@ export type Product = {
   cons: string[];
   whenToApply: { icon: string; label: string; detail: string }[];
   perfectOccasion: string;
+  status?: "in-stock" | "sold-out";
+  image2?: string;
 };
 
 type Props = {
@@ -43,11 +46,15 @@ const categoryColor: Record<string, string> = {
 
 const ProductModal = ({ product, onClose }: Props) => {
   const { addToCart, showCartToast } = useCart();
+  const { user } = useAuth();
+
+  const [activeImageIndex, setActiveImageIndex] = useState(0);
 
   // Lock body scroll when open
   useEffect(() => {
     if (product) {
       document.body.style.overflow = "hidden";
+      setActiveImageIndex(0);
     } else {
       document.body.style.overflow = "";
     }
@@ -115,19 +122,43 @@ const ProductModal = ({ product, onClose }: Props) => {
           */}
           <div className="relative w-full md:w-80 h-44 md:h-auto flex-shrink-0">
             <Image
-              src={product.image}
+              src={activeImageIndex === 0 ? product.image : (product.image2 || product.image)}
               alt={product.name}
               fill
-              className="object-cover md:rounded-bl-xl"
+              className={`object-cover md:rounded-bl-xl transition-all duration-500 ${product.status === "sold-out" ? "grayscale opacity-80" : ""}`}
             />
             {/* Gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#111114] via-transparent to-transparent md:bg-gradient-to-r" />
-            {/* Discount badge */}
-            <div className="absolute top-3 left-3">
-              <span className="bg-gold-oud text-deep-noir text-[10px] font-bold px-2.5 py-1 rounded-sm">
+            <div className="absolute inset-0 bg-gradient-to-t from-[#111114] via-transparent to-transparent md:bg-gradient-to-r pointer-events-none" />
+            
+            {/* Badges */}
+            <div className="absolute top-3 left-3 flex flex-col gap-2 pointer-events-none">
+              <span className="bg-gold-oud text-deep-noir text-[10px] font-bold px-2.5 py-1 rounded-sm shadow-md">
                 -{discount}% OFF
               </span>
+              {product.status === "sold-out" && (
+                <span className="bg-rose-600 text-white text-[10px] font-bold px-2.5 py-1 rounded-sm uppercase tracking-widest shadow-md border border-rose-500/50">
+                  Sold Out
+                </span>
+              )}
             </div>
+
+            {/* Thumbnails */}
+            {product.image2 && (
+              <div className="absolute bottom-4 left-0 right-0 flex justify-center gap-3 z-20">
+                <button 
+                  onClick={(e) => { e.stopPropagation(); setActiveImageIndex(0); }}
+                  className={`w-14 h-14 relative rounded-md overflow-hidden border-2 transition-all ${activeImageIndex === 0 ? 'border-gold-oud scale-110 shadow-lg' : 'border-transparent opacity-60 hover:opacity-100 hover:scale-105'}`}
+                >
+                  <Image src={product.image} fill className="object-cover" alt="Front" />
+                </button>
+                <button 
+                  onClick={(e) => { e.stopPropagation(); setActiveImageIndex(1); }}
+                  className={`w-14 h-14 relative rounded-md overflow-hidden border-2 transition-all ${activeImageIndex === 1 ? 'border-gold-oud scale-110 shadow-lg' : 'border-transparent opacity-60 hover:opacity-100 hover:scale-105'}`}
+                >
+                  <Image src={product.image2} fill className="object-cover" alt="Back" />
+                </button>
+              </div>
+            )}
           </div>
 
           {/* ── Right: Details + Pinned CTA ── */}
@@ -165,19 +196,38 @@ const ProductModal = ({ product, onClose }: Props) => {
               <div className="h-px bg-parchment/8" />
 
               {/* Highlights */}
-              <div>
-                <h3 className="text-[10px] uppercase tracking-[0.3em] text-gold-oud mb-2.5 flex items-center gap-2">
-                  <CheckCircle2 size={12} className="text-emerald-400" /> Highlights
-                </h3>
-                <ul className="flex flex-col gap-1.5">
-                  {product.pros.slice(0, 3).map((pro, i) => (
-                    <li key={i} className="flex items-start gap-2 text-xs text-parchment/70 leading-relaxed">
-                      <CheckCircle2 size={13} className="text-emerald-400 flex-shrink-0 mt-0.5" />
-                      {pro}
-                    </li>
-                  ))}
-                </ul>
-              </div>
+              {product.pros && product.pros.length > 0 && (
+                <div>
+                  <h3 className="text-[10px] uppercase tracking-[0.3em] text-gold-oud mb-2.5 flex items-center gap-2">
+                    <CheckCircle2 size={12} className="text-emerald-400" /> Pros
+                  </h3>
+                  <ul className="flex flex-col gap-1.5">
+                    {product.pros.map((pro, i) => (
+                      <li key={i} className="flex items-start gap-2 text-xs text-parchment/70 leading-relaxed">
+                        <CheckCircle2 size={13} className="text-emerald-400 flex-shrink-0 mt-0.5" />
+                        {pro}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+
+              {/* Considerations (Cons) */}
+              {product.cons && product.cons.length > 0 && (
+                <div>
+                  <h3 className="text-[10px] uppercase tracking-[0.3em] text-rose-400 mb-2.5 flex items-center gap-2">
+                    <X size={12} className="text-rose-500" /> Cons
+                  </h3>
+                  <ul className="flex flex-col gap-1.5">
+                    {product.cons.map((con, i) => (
+                      <li key={i} className="flex items-start gap-2 text-xs text-parchment/70 leading-relaxed">
+                        <X size={13} className="text-rose-500 flex-shrink-0 mt-0.5" />
+                        {con}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
 
               {/* When to Apply */}
               <div>
@@ -203,24 +253,47 @@ const ProductModal = ({ product, onClose }: Props) => {
 
             {/* ── Pinned CTA bar — always visible, never scrolls away ── */}
             <div className="flex-shrink-0 p-4 md:px-8 md:pb-8 bg-[#111114] border-t border-parchment/8 flex flex-col gap-2.5">
-              <a 
-                href={`https://wa.me/233506626068?text=Hello Scentiva, I would like to order: ${product.name} (SKU: ${product.id})`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="w-full bg-gradient-to-r from-[#075E54] to-[#128C7E] text-white py-4 text-[10px] font-bold uppercase tracking-[0.3em] flex items-center justify-center gap-3 hover:shadow-[0_0_30px_rgba(37,211,102,0.3)] hover:scale-[1.01] active:scale-[0.98] transition-all duration-300 rounded-lg group shadow-xl relative overflow-hidden"
-              >
-                <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
-                <MessageCircle size={16} fill="white" className="animate-pulse" />
-                Order via WhatsApp
-              </a>
-              
-              <button 
-                onClick={handleAddToCart}
-                className="w-full bg-gold-oud text-deep-noir py-3.5 text-xs font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-2 hover:bg-parchment active:scale-[0.98] transition-all duration-200 rounded-sm"
-              >
-                <ShoppingCart size={14} />
-                Add to Bag — GH₵ {product.actual}
-              </button>
+              {product.status === "sold-out" ? (
+                <>
+                  <p className="text-[10px] text-center text-parchment/60 uppercase tracking-widest mb-1">
+                    Restocking soon. Secure yours without payment today.
+                  </p>
+                  <a 
+                    href={`https://wa.me/233506626068?text=${encodeURIComponent(
+                      `Hello Scentiva, I am ${user?.fullName || "a customer"} and I would like to PRE-ORDER: ${product.name} (SKU: ${product.id}). Please notify me when it's back in stock!`
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full bg-gradient-to-r from-parchment/10 to-parchment/5 border border-parchment/20 text-parchment py-4 text-[10px] font-bold uppercase tracking-[0.3em] flex items-center justify-center gap-3 hover:bg-parchment/20 transition-all duration-300 rounded-lg"
+                  >
+                    <MessageCircle size={16} className="text-parchment" />
+                    Pre-order & Notify Me (Free)
+                  </a>
+                </>
+              ) : (
+                <>
+                  <a 
+                    href={`https://wa.me/233506626068?text=${encodeURIComponent(
+                      `Hello Scentiva, I am ${user?.fullName || "a customer"} and I would like to order: ${product.name} (SKU: ${product.id})`
+                    )}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="w-full bg-gradient-to-r from-[#075E54] to-[#128C7E] text-white py-4 text-[10px] font-bold uppercase tracking-[0.3em] flex items-center justify-center gap-3 hover:shadow-[0_0_30px_rgba(37,211,102,0.3)] hover:scale-[1.01] active:scale-[0.98] transition-all duration-300 rounded-lg group shadow-xl relative overflow-hidden"
+                  >
+                    <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <MessageCircle size={16} fill="white" className="animate-pulse" />
+                    Order via WhatsApp
+                  </a>
+                  
+                  <button 
+                    onClick={handleAddToCart}
+                    className="w-full bg-gold-oud text-deep-noir py-3.5 text-xs font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-2 hover:bg-parchment active:scale-[0.98] transition-all duration-200 rounded-sm"
+                  >
+                    <ShoppingCart size={14} />
+                    Add to Bag — GH₵ {product.actual}
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>

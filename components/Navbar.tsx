@@ -5,6 +5,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { Heart, ShoppingBag, User, Menu, X } from "lucide-react";
 import { useCart } from "@/context/CartContext";
+import { useAuth } from "@/context/AuthContext";
 
 const navLinks = [
   { label: "Home",    href: "/#" },
@@ -17,6 +18,9 @@ const Navbar = () => {
   const { totalItems, setIsCartOpen } = useCart();
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { user } = useAuth();
+  
+  const isAdmin = user?.role?.toUpperCase() === "ADMIN";
 
   useEffect(() => {
     const handleScroll = () => {
@@ -74,9 +78,15 @@ const Navbar = () => {
               </span>
             )}
           </button>
-          <Link href="/signin" className="hover:text-gold-oud transition-colors">
-            <User size={20} />
-          </Link>
+          {isAdmin ? (
+            <Link href="/admin" className="hover:text-gold-oud transition-colors flex items-center gap-1 font-bold">
+              <User size={20} /> <span className="text-[10px] uppercase tracking-widest">Admin</span>
+            </Link>
+          ) : (
+            <Link href="/signin" className="hover:text-gold-oud transition-colors">
+              <User size={20} />
+            </Link>
+          )}
         </div>
 
         {/* Mobile Menu Button */}
@@ -117,9 +127,15 @@ const Navbar = () => {
                 </span>
               )}
             </button>
-            <Link href="/signin" onClick={() => setIsMobileMenuOpen(false)}>
-              <User size={20} />
-            </Link>
+            {isAdmin ? (
+              <Link href="/admin" onClick={() => setIsMobileMenuOpen(false)} className="flex items-center gap-1 text-gold-oud">
+                <User size={20} /> <span className="text-[10px] uppercase tracking-widest font-bold">Admin Panel</span>
+              </Link>
+            ) : (
+              <Link href="/signin" onClick={() => setIsMobileMenuOpen(false)}>
+                <User size={20} />
+              </Link>
+            )}
           </div>
         </div>
       )}

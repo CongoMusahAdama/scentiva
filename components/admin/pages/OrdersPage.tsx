@@ -5,6 +5,8 @@ import { Eye, Search, ChevronDown, Trash2 } from "lucide-react";
 import { AdminCard } from "@/components/admin/AdminCards";
 import { AdminButton, Badge, AdminModal, AdminSelect, AdminInput, AdminPagination, AdminTable, AdminMobileCard } from "@/components/admin/AdminUI";
 import { showSuccess, showConfirm } from "@/lib/swal";
+import { useEffect } from "react";
+import { OrderService } from "@/lib/services/order.service";
 
 type OrderStatus = "pending" | "paid" | "delivered";
 
@@ -41,6 +43,20 @@ export default function OrdersPage() {
   const [filter, setFilter] = useState<"all" | OrderStatus>("all");
   const [searchQuery, setSearchQuery] = useState("");
 
+  useEffect(() => {
+    OrderService.fetchAll().then((data: any[]) => {
+      // Merge DB orders that aren't already in the mock list
+      const newDbOrders = data.filter(dbO => !initialOrders.find(io => io.id === dbO.id));
+      if (newDbOrders.length > 0) {
+        setOrders(prev => {
+          const combined = [...newDbOrders.reverse(), ...prev];
+          // Filter duplicates in case of hot-reload
+          return combined.filter((v, i, a) => a.findIndex(t => t.id === v.id) === i);
+        });
+      }
+    });
+  }, []);
+
   const filtered = orders.filter((o) => {
     const matchesStatus = filter === "all" || o.status === filter;
     const q = searchQuery.toLowerCase();
@@ -57,6 +73,10 @@ export default function OrdersPage() {
   const updateStatus = (id: string, status: OrderStatus) => {
     setOrders((prev) => prev.map((o) => (o.id === id ? { ...o, status } : o)));
     if (detail?.id === id) setDetail((d) => d ? { ...d, status } : d);
+    
+    // Save to Live Backend
+    OrderService.updateStatus(id, status).catch(console.error);
+    
     showSuccess("Status Updated", `Order #${id} is now ${status}.`);
   };
 
@@ -68,6 +88,10 @@ export default function OrdersPage() {
     );
     if (result.isConfirmed) {
       setOrders((prev) => prev.filter((o) => o.id !== id));
+      
+      // Delete from Live Backend
+      OrderService.deleteOrder(id).catch(console.error);
+      
       showSuccess("Deleted", "Order has been removed.");
     }
   };
@@ -116,7 +140,7 @@ export default function OrdersPage() {
 
       <AdminCard noPadding>
         <AdminTable 
-        headers={["S/N", "Order ID", "Customer", "Product(s)", "Amount", "Status", "Date", "Actions"]}
+        headers={["S/N", "Order ID", "Customer", "Location", "Product(s)", "Amount", "Status", "Date", "Actions"]}
         mobileCards={filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize).map((order, idx) => (
            <AdminMobileCard
               key={order.id}
@@ -124,6 +148,7 @@ export default function OrdersPage() {
               subtitle={order.customer}
               status={<Badge variant={order.status} label={order.status} />}
               details={[
+                { label: "Location", value: order.address },
                 { label: "Products", value: order.products },
                 { label: "Amount", value: order.amount },
                 { label: "Date", value: order.date },
@@ -155,6 +180,9 @@ export default function OrdersPage() {
             </td>
             <td className="px-6 py-4">
               <span className="text-[13px] text-[#1A1B23] font-medium">{order.customer}</span>
+            </td>
+            <td className="px-6 py-4">
+              <span className="text-[13px] text-[#6B7280]">{order.address}</span>
             </td>
             <td className="px-6 py-4 max-w-[200px]">
               <span className="text-[12px] text-[#6B7280] truncate block">{order.products}</span>

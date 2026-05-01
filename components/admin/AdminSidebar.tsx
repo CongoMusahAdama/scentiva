@@ -1,12 +1,15 @@
 "use client";
 
 import { useAdmin, AdminPage } from "@/context/AdminContext";
+import { useAuth } from "@/context/AuthContext";
 import {
   LayoutDashboard, Package, ShoppingBag, Users,
-  Star, Share2, Settings, ChevronLeft, ChevronRight, FileText, X, LogOut
+  Star, Share2, Settings, ChevronLeft, ChevronRight, FileText, X, LogOut, ExternalLink
 } from "lucide-react";
 import Image from "next/image";
 import { motion } from "framer-motion";
+import { showConfirm } from "@/lib/swal";
+import Link from "next/link";
 
 const menuItems: { id: AdminPage; label: string; icon: React.ReactNode }[] = [
   { id: "dashboard", label: "Dashboard", icon: <LayoutDashboard size={17} /> },
@@ -21,6 +24,18 @@ const menuItems: { id: AdminPage; label: string; icon: React.ReactNode }[] = [
 
 export default function AdminSidebar() {
   const { activePage, setActivePage, sidebarCollapsed, setSidebarCollapsed, setMobileSidebarOpen } = useAdmin();
+  const { logout } = useAuth();
+
+  const handleLogout = async () => {
+    const result = await showConfirm(
+      "Confirm Logout",
+      "Are you sure you want to sign out of the admin panel?",
+      "Yes, sign out"
+    );
+    if (result.isConfirmed) {
+      logout();
+    }
+  };
 
   return (
     <aside
@@ -37,28 +52,40 @@ export default function AdminSidebar() {
         style={{ borderBottom: "1px solid #F0F1F4", minHeight: "80px" }}
       >
         <div className="flex items-center gap-3">
-          <div className="relative w-8 h-8 rounded-lg overflow-hidden flex-shrink-0 bg-[#D8B34B]/10 border border-[#D8B34B]/20 flex items-center justify-center">
-             <span className="text-[#D8B34B] font-bold text-lg">S</span>
+          <div className={`relative ${sidebarCollapsed ? 'w-10' : 'w-32'} h-10 overflow-hidden flex-shrink-0 flex items-center transition-all`}>
+            <Image 
+              src={sidebarCollapsed ? "/01_primary_logo_transparent.png" : "/01_primary_logo_transparent.png"} 
+              alt="Logo" 
+              width={128} 
+              height={40} 
+              className="object-contain" 
+            />
           </div>
-          {!sidebarCollapsed && (
-            <div className="flex flex-col">
-              <span className="font-lora font-bold text-[#1A1B23] text-[14px] tracking-widest uppercase">Scentiva</span>
-              <span className="font-poppins text-[10px] text-[#D8B34B] tracking-[.25em] -mt-1">AURA</span>
-            </div>
-          )}
         </div>
         
-        {/* Mobile Close Button */}
-        <button 
-          onClick={() => setMobileSidebarOpen(false)}
-          className="lg:hidden p-2 text-[#9CA3AF] hover:text-[#1A1B23]"
-        >
-          <X size={20} />
-        </button>
+        <div className="flex items-center gap-1">
+          {/* Sidebar Collapse Toggle (Desktop only) */}
+          <button
+            onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+            className="hidden lg:flex p-2 text-[#9CA3AF] hover:text-[#D8B34B] hover:bg-[#F5F6FA] rounded-lg transition-all"
+            title={sidebarCollapsed ? "Expand" : "Collapse"}
+          >
+            {sidebarCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
+          </button>
+
+          {/* Mobile Close Button */}
+          <button 
+            onClick={() => setMobileSidebarOpen(false)}
+            className="lg:hidden p-2 text-[#9CA3AF] hover:text-[#1A1B23]"
+          >
+            <X size={20} />
+          </button>
+        </div>
       </div>
 
+
       {/* Navigation */}
-      <nav className="flex-1 py-8 px-4 flex flex-col gap-2 overflow-y-auto custom-scrollbar">
+      <nav className="flex-1 py-4 px-4 flex flex-col gap-1 overflow-y-auto custom-scrollbar">
         {menuItems.map((item) => {
           const active = activePage === item.id;
           return (
@@ -72,7 +99,7 @@ export default function AdminSidebar() {
                 active ? "bg-[#D8B34B]/10 text-[#D8B34B]" : "text-[#9CA3AF] hover:text-[#1A1B23] hover:bg-[#F5F6FA]"
               }`}
               style={{
-                padding: "12px",
+                padding: "10px 12px",
                 justifyContent: sidebarCollapsed ? "center" : "flex-start",
                 cursor: "pointer",
                 border: "none",
@@ -98,24 +125,23 @@ export default function AdminSidebar() {
         })}
       </nav>
 
-      {/* Sidebar Collapse Toggle (Desktop only) */}
-      <div className="p-4 mt-auto border-t border-[#F0F1F4] hidden lg:block">
-        <button
-          onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-          className="flex items-center justify-center w-full py-2.5 rounded-xl bg-[#F5F6FA] border border-[#E8E9EC] text-[#9CA3AF] hover:text-[#1A1B23] transition-all"
-        >
-          {sidebarCollapsed ? <ChevronRight size={16} /> : <ChevronLeft size={16} />}
-          {!sidebarCollapsed && <span className="ml-2 text-xs font-semibold uppercase tracking-wider">Collapse</span>}
-        </button>
+      <div className="flex flex-col border-t border-[#F0F1F4] mt-auto">
+        <div className="px-4 pt-4 pb-1">
+          <Link href="/shop" className={`flex items-center gap-4 w-full p-3 rounded-xl transition-colors text-[#9CA3AF] hover:bg-[#F5F6FA] hover:text-[#1A1B23] ${sidebarCollapsed ? 'justify-center' : ''}`}>
+            <ExternalLink size={17} />
+            {!sidebarCollapsed && <span className="text-[13px] font-medium font-poppins">View Storefront</span>}
+          </Link>
+        </div>
+        {/* Logout (Both Mobile and Desktop) */}
+        <div className="px-4 py-2 mb-2">
+          <button onClick={handleLogout} className={`flex items-center gap-4 w-full p-3 rounded-xl transition-colors text-[#9CA3AF] hover:bg-red-50 hover:text-red-500 ${sidebarCollapsed ? 'justify-center' : ''}`}>
+            <LogOut size={17} />
+            {!sidebarCollapsed && <span className="text-[13px] font-medium font-poppins">Logout</span>}
+          </button>
+        </div>
       </div>
-      
-      {/* Logout */}
-      <div className="p-4 border-t border-[#F0F1F4] lg:hidden">
-         <button className="flex items-center gap-3 w-full p-3 text-[#9CA3AF] hover:text-[#1A1B23] transition-colors">
-            <LogOut size={18} />
-            <span className="text-sm font-medium">Logout</span>
-         </button>
-      </div>
+
+
     </aside>
   );
 }

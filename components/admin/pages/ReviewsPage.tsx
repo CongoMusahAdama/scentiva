@@ -1,49 +1,52 @@
 "use client";
 
-import { useState } from "react";
-import { showSuccess } from "@/lib/swal";
+import { useState, useEffect } from "react";
+import { showSuccess, showError } from "@/lib/swal";
 import { Check, X } from "lucide-react";
 import { AdminCard } from "@/components/admin/AdminCards";
 import { AdminButton, Badge, AdminPagination } from "@/components/admin/AdminUI";
-
-type ReviewStatus = "pending" | "approved" | "rejected";
-
-interface Review {
-  id: number;
-  customer: string;
-  product: string;
-  rating: number;
-  comment: string;
-  date: string;
-  status: ReviewStatus;
-}
-
-const initialReviews: Review[] = [
-  { id: 1, customer: "Ama Asante", product: "Oud Royale", rating: 5, comment: "Absolutely divine. The longevity is unmatched — I still get compliments 10 hours later.", date: "Apr 20, 2026", status: "pending" },
-  { id: 2, customer: "Kwame Mensah", product: "Velvet Noir", rating: 4, comment: "Rich and sophisticated. Perfect for evening wear. Would recommend to anyone who loves depth.", date: "Apr 19, 2026", status: "pending" },
-  { id: 3, customer: "Efua Boateng", product: "Citrus Bloom", rating: 5, comment: "So fresh and uplifting. My go-to for office days. Light but lasts through the day.", date: "Apr 18, 2026", status: "approved" },
-  { id: 4, customer: "Nana Yaw", product: "Amber Mist", rating: 3, comment: "Nice scent but the bottle leaked during shipping. Would appreciate better packaging.", date: "Apr 17, 2026", status: "pending" },
-  { id: 5, customer: "Abena Sarpong", product: "Oud Royale", rating: 5, comment: "Worth every pesewa. Truly a luxury experience.", date: "Apr 16, 2026", status: "approved" },
-  { id: 6, customer: "Kofi Darko", product: "Velvet Noir", rating: 2, comment: "Not what I expected. Too heavy for my preference.", date: "Apr 15, 2026", status: "rejected" },
-];
+import { ReviewService, Review } from "@/lib/services/review.service";
 
 export default function ReviewsPage() {
-  const [reviews, setReviews] = useState<Review[]>(initialReviews);
-  const [filter, setFilter] = useState<"all" | ReviewStatus>("all");
+  const [reviews, setReviews] = useState<Review[]>([]);
+  const [filter, setFilter] = useState<"all" | "pending" | "approved" | "rejected">("all");
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 10;
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchReviews();
+  }, []);
+
+  const fetchReviews = async () => {
+    try {
+      setLoading(true);
+      const data = await ReviewService.getAllReviews();
+      setReviews(data);
+    } catch (error) {
+      console.error(error);
+      showError("Sync Error", "Failed to load reviews from database.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filtered = filter === "all" ? reviews : reviews.filter((r) => r.status === filter);
 
-  const updateStatus = (id: number, status: "approved" | "rejected") => {
-    setReviews((prev) => prev.map((r) => (r.id === id ? { ...r, status } : r)));
-    showSuccess(
-      status === "approved" ? "Review Approved" : "Review Hidden",
-      `The review has been ${status === "approved" ? "published" : "removed"} successfully.`
-    );
+  const updateStatus = async (id: string, status: "approved" | "rejected") => {
+    try {
+      await ReviewService.updateStatus(id, status);
+      setReviews((prev) => prev.map((r) => (r.id === id ? { ...r, status } : r)));
+      showSuccess(
+        status === "approved" ? "Review Approved" : "Review Hidden",
+        `The review has been ${status === "approved" ? "published" : "removed"} successfully.`
+      );
+    } catch (error) {
+      showError("Update Failed", "Could not update the review status.");
+    }
   };
 
-  const onFilterChange = (f: "all" | ReviewStatus) => {
+  const onFilterChange = (f: "all" | "pending" | "approved" | "rejected") => {
     setFilter(f);
     setCurrentPage(1);
   };
@@ -123,12 +126,12 @@ export default function ReviewsPage() {
               {/* Actions */}
               {r.status === "pending" && (
                 <div className="flex items-center gap-2 shrink-0 pt-1">
-                  <AdminButton variant="secondary" size="sm" onClick={() => updateStatus(r.id, "approved")}
+                  <AdminButton variant="secondary" size="sm" onClick={() => updateStatus(r.id as string, "approved")}
                     style={{ color: "#059669", borderColor: "rgba(16,185,129,0.3)", background: "rgba(16,185,129,0.07)" }}
                   >
                     <Check size={12} /> Approve
                   </AdminButton>
-                  <AdminButton variant="danger" size="sm" onClick={() => updateStatus(r.id, "rejected")}>
+                  <AdminButton variant="danger" size="sm" onClick={() => updateStatus(r.id as string, "rejected")}>
                     <X size={12} /> Reject
                   </AdminButton>
                 </div>

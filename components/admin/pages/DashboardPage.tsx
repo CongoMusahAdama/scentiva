@@ -1,47 +1,30 @@
 "use client";
 
-import { useState } from "react";
-import { Package, ShoppingBag, DollarSign, Users, ArrowRight, Plus, ChevronDown } from "lucide-react";
+import { useState, useEffect } from "react";
+import { ShoppingBag, ArrowRight, Plus, ChevronDown } from "lucide-react";
 import { StatCard, AdminCard } from "@/components/admin/AdminCards";
 import { Badge, AdminButton } from "@/components/admin/AdminUI";
 import { useAdmin } from "@/context/AdminContext";
-
-// ─── Sales chart data ─────────────────────────────────────────────────────────
-
-const chartData: Record<string, { label: string; value: number }[]> = {
-  "7d": [
-    { label: "Mon", value: 820 }, { label: "Tue", value: 1340 }, { label: "Wed", value: 960 },
-    { label: "Thu", value: 1780 }, { label: "Fri", value: 2100 }, { label: "Sat", value: 1560 },
-    { label: "Sun", value: 940 },
-  ],
-  "30d": [
-    { label: "Apr 1", value: 500 }, { label: "Apr 3", value: 820 }, { label: "Apr 5", value: 680 },
-    { label: "Apr 7", value: 1200 }, { label: "Apr 9", value: 950 }, { label: "Apr 11", value: 1800 },
-    { label: "Apr 13", value: 760 }, { label: "Apr 15", value: 2100 }, { label: "Apr 17", value: 1300 },
-    { label: "Apr 19", value: 1640 }, { label: "Apr 21", value: 980 }, { label: "Apr 23", value: 2200 },
-    { label: "Apr 25", value: 1550 }, { label: "Apr 27", value: 1870 }, { label: "Apr 29", value: 2400 },
-  ],
-  "90d": [
-    { label: "Feb", value: 9200 }, { label: "Mar", value: 14800 }, { label: "Apr", value: 22400 },
-  ],
-};
+import { useAuth } from "@/context/AuthContext";
+import { showError } from "@/lib/swal";
 
 const filterLabels: Record<string, string> = { "7d": "Past 7 Days", "30d": "Past 30 Days", "90d": "Past 90 Days" };
 
-function SalesChart({ filter }: { filter: string }) {
+function SalesChart({ filter, chartData }: { filter: string, chartData: any }) {
+  if (!chartData || !chartData[filter]) return <div className="text-gray-400 text-sm">No data</div>;
   const data = chartData[filter];
   const [hoveredIndex, setHoveredIndex] = useState<number | null>(null);
   
   const W = 620, H = 220, padL = 48, padB = 32, padT = 16, padR = 16;
   const innerW = W - padL - padR;
   const innerH = H - padB - padT;
-  const maxVal = Math.max(...data.map((d) => d.value)) * 1.15;
+  const maxVal = Math.max(...data.map((d: any) => d.value), 100) * 1.15; // fallback 100 max
 
-  const toX = (i: number) => padL + (i / (data.length - 1)) * innerW;
+  const toX = (i: number) => padL + (i / Math.max((data.length - 1), 1)) * innerW;
   const toY = (v: number) => padT + innerH - (v / maxVal) * innerH;
 
-  const polyline = data.map((d, i) => `${toX(i)},${toY(d.value)}`).join(" ");
-  const fill = `${polyline} ${toX(data.length - 1)},${H - padB} ${toX(0)},${H - padB}`;
+  const polyline = data.map((d: any, i: number) => `${toX(i)},${toY(d.value)}`).join(" ");
+  const fill = `${polyline} ${toX(Math.max(data.length - 1, 0))},${H - padB} ${toX(0)},${H - padB}`;
 
   const yLabels = Array.from({ length: 5 }, (_, i) => {
     const val = Math.round((maxVal / 4) * i);
@@ -52,8 +35,8 @@ function SalesChart({ filter }: { filter: string }) {
     <svg viewBox={`0 0 ${W} ${H}`} style={{ width: "100%", height: "100%", display: "block" }}>
       <defs>
         <linearGradient id="salesGrad" x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#D8B34B" stopOpacity="0.15" />
-          <stop offset="100%" stopColor="#D8B34B" stopOpacity="0" />
+          <stop offset="0%" stopColor="#A855F7" stopOpacity="0.15" />
+          <stop offset="100%" stopColor="#A855F7" stopOpacity="0" />
         </linearGradient>
       </defs>
 
@@ -80,10 +63,10 @@ function SalesChart({ filter }: { filter: string }) {
       )}
 
       {/* Main Line */}
-      <polyline points={polyline} fill="none" stroke="#D8B34B" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" style={{ transition: "all 0.4s ease" }} />
+      <polyline points={polyline} fill="none" stroke="#A855F7" strokeWidth="2.5" strokeLinejoin="round" strokeLinecap="round" style={{ transition: "all 0.4s ease" }} />
 
       {/* Interaction Rects (Invisible hotspots) */}
-      {data.map((d, i) => (
+      {data.map((d: any, i: number) => (
         <rect
           key={`hit-${i}`}
           x={toX(i) - 20} y={padT} width="40" height={innerH}
@@ -94,21 +77,21 @@ function SalesChart({ filter }: { filter: string }) {
       ))}
 
       {/* Dots + Tooltips */}
-      {data.map((d, i) => {
+      {data.map((d: any, i: number) => {
         const isHovered = hoveredIndex === i;
         return (
           <g key={i}>
             <circle
               cx={toX(i)} cy={toY(d.value)}
               r={isHovered ? 6 : 0}
-              fill="#D8B34B"
+              fill="#A855F7"
               style={{ transition: "r 0.2s ease" }}
             />
             <circle
               cx={toX(i)} cy={toY(d.value)}
               r={isHovered ? 3.5 : 3.5}
-              fill={isHovered ? "#FFFFFF" : "#D8B34B"}
-              stroke={isHovered ? "#D8B34B" : "none"}
+              fill={isHovered ? "#FFFFFF" : "#A855F7"}
+              stroke={isHovered ? "#A855F7" : "none"}
               strokeWidth="1.5"
               style={{ transition: "all 0.2s ease" }}
             />
@@ -131,31 +114,46 @@ function SalesChart({ filter }: { filter: string }) {
   );
 }
 
-// ─── Recent orders data ────────────────────────────────────────────────────────
-
-const recentOrders = [
-  { id: "SA-1042", customer: "Ama Asante", product: "Oud Royale", amount: "GHS 420", status: "paid" as const, date: "Apr 20" },
-  { id: "SA-1041", customer: "Kwame Mensah", product: "Velvet Noir", amount: "GHS 360", status: "pending" as const, date: "Apr 20" },
-  { id: "SA-1040", customer: "Efua Boateng", product: "Citrus Bloom", amount: "GHS 295", status: "delivered" as const, date: "Apr 19" },
-  { id: "SA-1039", customer: "Nana Yaw", product: "Amber Mist", amount: "GHS 310", status: "delivered" as const, date: "Apr 19" },
-  { id: "SA-1038", customer: "Abena Sarpong", product: "Oud Royale", amount: "GHS 420", status: "pending" as const, date: "Apr 18" },
-];
-
-// ─── Component ────────────────────────────────────────────────────────────────
-
 export default function DashboardPage() {
   const { setActivePage } = useAdmin();
+  const { token } = useAuth();
   const [chartFilter, setChartFilter] = useState<"7d" | "30d" | "90d">("30d");
   const [activeTab, setActiveTab] = useState<"performance" | "orders">("performance");
+  const [data, setData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    if (!token) return;
+
+    fetch("http://localhost:3001/admin/dashboard", {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+    .then(res => res.json())
+    .then(payload => {
+      setData(payload);
+      setLoading(false);
+    })
+    .catch(err => {
+      console.error(err);
+      showError("Dashboard Sync Failed", "Unable to load real-time metrics from the backend.");
+      setLoading(false);
+    });
+  }, [token]);
 
   const statColors = ["#4F6EF7", "#10B981", "#F59E0B", "#A855F7"];
+
+  if (loading) {
+    return <div className="text-sm font-medium text-gray-500 animate-pulse p-4">Loading real-time admin metrics...</div>;
+  }
 
   return (
     <div className="flex flex-col gap-5" style={{ maxWidth: "1200px" }}>
       {/* Greeting */}
       <div>
         <p style={{ fontSize: "10px", color: "#9CA3AF", fontFamily: "var(--font-poppins, sans-serif)", letterSpacing: "0.07em", textTransform: "uppercase" }}>
-          Sunday, 20 April 2026
+          {new Date().toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })}
         </p>
         <h2 style={{ fontFamily: "var(--font-lora, serif)", fontSize: "22px", fontWeight: 700, color: "#1A1B23", marginTop: "4px" }}>
           Welcome back, Admin 👋
@@ -163,11 +161,12 @@ export default function DashboardPage() {
       </div>
 
       {/* Summary grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <StatCard label="Total Products" value="24" subLabel="2 added this week" color={statColors[0]} />
-        <StatCard label="Total Orders" value="1,042" subLabel="12% this month" color={statColors[1]} />
-        <StatCard label="Revenue" value="GHS 48.2K" subLabel="8.4% vs last month" color={statColors[2]} />
-        <StatCard label="Active Customers" value="318" subLabel="Since last month" color={statColors[3]} />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+        <StatCard label="Total Products" value={data?.stats?.totalProducts?.toString() || "0"} subLabel="System database" color={statColors[0]} />
+        <StatCard label="Total Orders" value={data?.stats?.totalOrders?.toString() || "0"} subLabel="Cumulative sales" color={statColors[1]} />
+        <StatCard label="Revenue" value={`GHS ${data?.stats?.revenue?.toLocaleString() || "0"}`} subLabel="All time" color={statColors[2]} />
+        <StatCard label="Net Profit" value={`GHS ${data?.stats?.netProfit?.toLocaleString() || "0"}`} subLabel="Revenue - Costs" color="#10B981" />
+        <StatCard label="Active Customers" value={data?.stats?.activeCustomers?.toString() || "0"} subLabel="Registered profiles" color={statColors[3]} />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
@@ -222,50 +221,56 @@ export default function DashboardPage() {
                 <div>
                   <div className="mb-6 flex flex-wrap items-center gap-3">
                     <p className="text-[12px] text-[#9CA3AF] font-medium">
-                      {chartData[chartFilter].length} data points
+                      Live Backend Sync
                     </p>
                     <div className="h-4 w-px bg-[#E8E9EC]" />
                     <p className="text-[14px] text-[#1A1B23] font-bold">
-                       GHS {chartData[chartFilter].reduce((s, d) => s + d.value, 0).toLocaleString()} <span className="text-[11px] font-normal text-[#9CA3AF] uppercase tracking-wider ml-1">Total Revenue</span>
+                       GHS {data?.chartData?.[chartFilter]?.reduce((s:any, d:any) => s + d.value, 0).toLocaleString() || 0} <span className="text-[11px] font-normal text-[#9CA3AF] uppercase tracking-wider ml-1">Total Revenue</span>
                     </p>
                   </div>
                   <div className="h-[280px] w-full">
-                    <SalesChart filter={chartFilter} />
+                    <SalesChart filter={chartFilter} chartData={data?.chartData} />
                   </div>
                 </div>
               ) : (
                  <div className="overflow-x-auto -mx-5 px-5">
                     <table className="w-full border-collapse min-w-[500px]">
                       <thead>
-                        <tr>
+                        <tr style={{ backgroundColor: "#D8B34B" }}>
                           {["Order ID", "Customer", "Product", "Amount", "Status", "Date"].map((h) => (
-                            <th key={h} className="text-left text-[10px] font-bold text-[#9CA3AF] uppercase tracking-widest pb-4">
+                            <th key={h} className="text-left text-[10px] font-bold text-white uppercase tracking-widest px-4 py-4">
                               {h}
                             </th>
                           ))}
                         </tr>
                       </thead>
                       <tbody className="divide-y divide-[#F0F1F4]">
-                        {recentOrders.map((o) => (
-                          <tr key={o.id} className="hover:bg-[#F8F9FA] transition-colors">
-                            <td className="py-4">
-                              <span className="text-[12px] text-[#D8B34B] font-bold uppercase tracking-wider">{o.id}</span>
-                            </td>
-                            <td className="py-4">
-                              <span className="text-[13px] text-[#1A1B23] font-medium">{o.customer}</span>
-                            </td>
-                            <td className="py-4">
-                              <span className="text-[12px] text-[#6B7280]">{o.product}</span>
-                            </td>
-                            <td className="py-4">
-                              <span className="text-[13px] text-[#1A1B23] font-bold">{o.amount}</span>
-                            </td>
-                            <td className="py-4"><Badge variant={o.status} label={o.status} /></td>
-                            <td className="py-4">
-                              <span className="text-[11px] text-[#9CA3AF] font-bold uppercase tracking-wider">{o.date}</span>
-                            </td>
+                        {data?.recentOrders?.length > 0 ? (
+                          data.recentOrders.map((o: any) => (
+                            <tr key={o.id} className="hover:bg-[#F8F9FA] transition-colors">
+                              <td className="py-4">
+                                <span className="text-[12px] text-[#D8B34B] font-bold uppercase tracking-wider">{o.id}</span>
+                              </td>
+                              <td className="py-4">
+                                <span className="text-[13px] text-[#1A1B23] font-medium">{o.customer}</span>
+                              </td>
+                              <td className="py-4">
+                                <span className="text-[12px] text-[#6B7280]">{o.product}</span>
+                              </td>
+                              <td className="py-4">
+                                <span className="text-[13px] text-[#1A1B23] font-bold">{o.amount}</span>
+                              </td>
+                              <td className="py-4"><Badge variant={o.status} label={o.status} /></td>
+                              <td className="py-4">
+                                <span className="text-[11px] text-[#9CA3AF] font-bold uppercase tracking-wider">{o.date}</span>
+                              </td>
+                            </tr>
+                          ))
+                        ) : (
+                          <tr>
+                            <td colSpan={6} className="py-8 text-center text-sm text-gray-500">No orders placed yet.</td>
                           </tr>
-                        ))}
+                        )}
                       </tbody>
                     </table>
                  </div>
@@ -292,12 +297,7 @@ export default function DashboardPage() {
 
           <AdminCard title="Dashboard Alerts">
             <div className="divide-y divide-[#F0F1F4]">
-              {[
-                { label: "Reviews pending", value: "3", color: "#F59E0B" },
-                { label: "Low stock items", value: "2", color: "#EF4444" },
-                { label: "Referrals active", value: "41", color: "#10B981" },
-                { label: "New customers", value: "18", color: "#D8B34B" },
-              ].map((s) => (
+              {data?.alerts?.map((s: any) => (
                 <div key={s.label} className="flex items-center justify-between py-4">
                   <span className="text-[12px] text-[#6B7280] font-medium uppercase tracking-wider">{s.label}</span>
                   <span className="text-[16px] font-bold" style={{ color: s.color }}>{s.value}</span>

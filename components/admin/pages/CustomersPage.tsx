@@ -3,10 +3,13 @@
 import { useState } from "react";
 import { Search, Trash2 } from "lucide-react";
 import { AdminCard, AdminButton, AdminPagination, AdminTable, AdminMobileCard, Badge } from "@/components/admin/AdminUI";
-import { showSuccess, showConfirm } from "@/lib/swal";
+import { showSuccess, showConfirm, showError } from "@/lib/swal";
+import { CustomerService } from "@/lib/services/customer.service";
+import { useEffect } from "react";
 
 interface Customer {
-  id: number;
+  _id?: string;
+  id?: number;
   name: string;
   phone: string;
   orders: number;
@@ -29,7 +32,22 @@ export default function CustomersPage() {
   const [customers, setCustomers] = useState<Customer[]>(initialCustomers);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
+  const [loading, setLoading] = useState(true);
   const pageSize = 10;
+
+  useEffect(() => {
+    CustomerService.getAll()
+      .then((data) => {
+        if (data.length > 0) {
+          setCustomers(data);
+        }
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch live customers:", err);
+        setLoading(false);
+      });
+  }, []);
 
   const handleDelete = async (id: number | string, name: string) => {
     const result = await showConfirm(
@@ -38,8 +56,22 @@ export default function CustomersPage() {
       "Remove"
     );
     if (result.isConfirmed) {
-      setCustomers((prev) => prev.filter((c) => c.id !== id));
-      showSuccess("Customer Removed", "The customer record has been deleted.");
+      try {
+        const targetId = typeof id === 'number' ? id.toString() : id;
+        
+        // If it's a mock data ID (length < 10 typically), just remove it locally
+        if (targetId.length < 10) {
+           setCustomers((prev) => prev.filter((c) => c.id !== id && c._id !== id));
+           showSuccess("Customer Removed", "The customer record has been deleted.");
+           return;
+        }
+
+        await CustomerService.delete(targetId);
+        setCustomers((prev) => prev.filter((c) => c._id !== targetId));
+        showSuccess("Customer Removed", "The customer record has been deleted from the database.");
+      } catch (err) {
+        showError("Delete Failed", "Could not remove customer from backend.");
+      }
     }
   };
 
@@ -72,7 +104,7 @@ export default function CustomersPage() {
         headers={["S/N", "Customer", "Phone", "Orders", "Total Spent", "Referral Code", "Joined", "Actions"]}
         mobileCards={filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize).map((c, idx) => (
            <AdminMobileCard
-              key={c.id}
+              key={c._id || c.id}
               title={c.name}
               subtitle={c.phone}
               image={
@@ -89,14 +121,14 @@ export default function CustomersPage() {
               actions={
                 <div className="flex items-center gap-2 w-full">
                   <AdminButton variant="outline" size="sm" className="flex-1">View Details</AdminButton>
-                  <AdminButton variant="danger" size="sm" onClick={() => handleDelete(c.id, c.name)}><Trash2 size={14} /></AdminButton>
+                  <AdminButton variant="danger" size="sm" onClick={() => handleDelete(c._id || c.id || '', c.name)}><Trash2 size={14} /></AdminButton>
                 </div>
               }
            />
         ))}
       >
         {filtered.slice((currentPage - 1) * pageSize, currentPage * pageSize).map((c, idx) => (
-          <tr key={c.id} className="border-t border-[#F0F1F4] hover:bg-[#F8F9FA] transition-colors">
+          <tr key={c._id || c.id} className="border-t border-[#F0F1F4] hover:bg-[#F8F9FA] transition-colors">
             <td className="px-6 py-4 font-bold text-[#9CA3AF] text-[11px]">
               {(currentPage - 1) * pageSize + idx + 1}
             </td>
@@ -127,7 +159,7 @@ export default function CustomersPage() {
             </td>
             <td className="px-6 py-4">
               <div className="flex items-center gap-2">
-                <button onClick={() => handleDelete(c.id, c.name)} className="p-2 hover:bg-rose-50 text-[#9CA3AF] hover:text-rose-500 transition-colors"><Trash2 size={16} /></button>
+                <button onClick={() => handleDelete(c._id || c.id || '', c.name)} className="p-2 hover:bg-rose-50 text-[#9CA3AF] hover:text-rose-500 transition-colors"><Trash2 size={16} /></button>
               </div>
             </td>
           </tr>
