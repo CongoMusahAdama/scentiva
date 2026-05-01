@@ -88,6 +88,7 @@ export default function ProductsPage() {
             id: p.id,
             name: p.name,
             price: p.original ? p.original.toString() : p.actual.toString(),
+            costPrice: (p as any).costPrice || 0,
             discount: p.original && p.original > p.actual ? Math.round(((p.original - p.actual) / p.original) * 100) : 0,
             category: p.category,
             scentType: p.tag ? p.tag.split(" ")[0].replace("'", "") : "",
