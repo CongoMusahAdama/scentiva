@@ -14,6 +14,11 @@ export declare const OrderSchema: import("mongoose").Schema<Order, import("mongo
 }> & {
     __v: number;
 }, {
+    date?: import("mongoose").SchemaDefinitionProperty<string, Order, Document<unknown, {}, Order, {}, import("mongoose").DefaultSchemaOptions> & Order & Required<{
+        _id: import("mongoose").Types.ObjectId;
+    }> & {
+        __v: number;
+    }> | undefined;
     _id?: import("mongoose").SchemaDefinitionProperty<import("mongoose").Types.ObjectId, Order, Document<unknown, {}, Order, {}, import("mongoose").DefaultSchemaOptions> & Order & Required<{
         _id: import("mongoose").Types.ObjectId;
     }> & {
@@ -24,17 +29,7 @@ export declare const OrderSchema: import("mongoose").Schema<Order, import("mongo
     }> & {
         __v: number;
     }> | undefined;
-    customer?: import("mongoose").SchemaDefinitionProperty<string, Order, Document<unknown, {}, Order, {}, import("mongoose").DefaultSchemaOptions> & Order & Required<{
-        _id: import("mongoose").Types.ObjectId;
-    }> & {
-        __v: number;
-    }> | undefined;
-    products?: import("mongoose").SchemaDefinitionProperty<string, Order, Document<unknown, {}, Order, {}, import("mongoose").DefaultSchemaOptions> & Order & Required<{
-        _id: import("mongoose").Types.ObjectId;
-    }> & {
-        __v: number;
-    }> | undefined;
-    amount?: import("mongoose").SchemaDefinitionProperty<string, Order, Document<unknown, {}, Order, {}, import("mongoose").DefaultSchemaOptions> & Order & Required<{
+    phone?: import("mongoose").SchemaDefinitionProperty<string, Order, Document<unknown, {}, Order, {}, import("mongoose").DefaultSchemaOptions> & Order & Required<{
         _id: import("mongoose").Types.ObjectId;
     }> & {
         __v: number;
@@ -44,12 +39,17 @@ export declare const OrderSchema: import("mongoose").Schema<Order, import("mongo
     }> & {
         __v: number;
     }> | undefined;
-    date?: import("mongoose").SchemaDefinitionProperty<string, Order, Document<unknown, {}, Order, {}, import("mongoose").DefaultSchemaOptions> & Order & Required<{
+    products?: import("mongoose").SchemaDefinitionProperty<string, Order, Document<unknown, {}, Order, {}, import("mongoose").DefaultSchemaOptions> & Order & Required<{
         _id: import("mongoose").Types.ObjectId;
     }> & {
         __v: number;
     }> | undefined;
-    phone?: import("mongoose").SchemaDefinitionProperty<string, Order, Document<unknown, {}, Order, {}, import("mongoose").DefaultSchemaOptions> & Order & Required<{
+    customer?: import("mongoose").SchemaDefinitionProperty<string, Order, Document<unknown, {}, Order, {}, import("mongoose").DefaultSchemaOptions> & Order & Required<{
+        _id: import("mongoose").Types.ObjectId;
+    }> & {
+        __v: number;
+    }> | undefined;
+    amount?: import("mongoose").SchemaDefinitionProperty<string, Order, Document<unknown, {}, Order, {}, import("mongoose").DefaultSchemaOptions> & Order & Required<{
         _id: import("mongoose").Types.ObjectId;
     }> & {
         __v: number;

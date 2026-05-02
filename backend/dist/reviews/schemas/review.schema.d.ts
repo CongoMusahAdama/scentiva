@@ -16,7 +16,34 @@ export declare const ReviewSchema: import("mongoose").Schema<Review, import("mon
 }, "id"> & {
     id: string;
 }, {
+    date?: import("mongoose").SchemaDefinitionProperty<string, Review, Document<unknown, {}, Review, {
+        id: string;
+    }, import("mongoose").DefaultSchemaOptions> & Omit<Review & Required<{
+        _id: import("mongoose").Types.ObjectId;
+    }> & {
+        __v: number;
+    }, "id"> & {
+        id: string;
+    }> | undefined;
     _id?: import("mongoose").SchemaDefinitionProperty<import("mongoose").Types.ObjectId, Review, Document<unknown, {}, Review, {
+        id: string;
+    }, import("mongoose").DefaultSchemaOptions> & Omit<Review & Required<{
+        _id: import("mongoose").Types.ObjectId;
+    }> & {
+        __v: number;
+    }, "id"> & {
+        id: string;
+    }> | undefined;
+    comment?: import("mongoose").SchemaDefinitionProperty<string, Review, Document<unknown, {}, Review, {
+        id: string;
+    }, import("mongoose").DefaultSchemaOptions> & Omit<Review & Required<{
+        _id: import("mongoose").Types.ObjectId;
+    }> & {
+        __v: number;
+    }, "id"> & {
+        id: string;
+    }> | undefined;
+    status?: import("mongoose").SchemaDefinitionProperty<"pending" | "approved" | "rejected", Review, Document<unknown, {}, Review, {
         id: string;
     }, import("mongoose").DefaultSchemaOptions> & Omit<Review & Required<{
         _id: import("mongoose").Types.ObjectId;
@@ -44,33 +71,6 @@ export declare const ReviewSchema: import("mongoose").Schema<Review, import("mon
         id: string;
     }> | undefined;
     rating?: import("mongoose").SchemaDefinitionProperty<number, Review, Document<unknown, {}, Review, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Review & Required<{
-        _id: import("mongoose").Types.ObjectId;
-    }> & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    comment?: import("mongoose").SchemaDefinitionProperty<string, Review, Document<unknown, {}, Review, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Review & Required<{
-        _id: import("mongoose").Types.ObjectId;
-    }> & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    date?: import("mongoose").SchemaDefinitionProperty<string, Review, Document<unknown, {}, Review, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<Review & Required<{
-        _id: import("mongoose").Types.ObjectId;
-    }> & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
-    status?: import("mongoose").SchemaDefinitionProperty<"pending" | "approved" | "rejected", Review, Document<unknown, {}, Review, {
         id: string;
     }, import("mongoose").DefaultSchemaOptions> & Omit<Review & Required<{
         _id: import("mongoose").Types.ObjectId;

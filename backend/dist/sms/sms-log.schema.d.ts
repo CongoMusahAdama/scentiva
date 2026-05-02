@@ -25,15 +25,6 @@ export declare const SmsLogSchema: import("mongoose").Schema<SmsLog, import("mon
     }, "id"> & {
         id: string;
     }> | undefined;
-    recipient?: import("mongoose").SchemaDefinitionProperty<string, SmsLog, Document<unknown, {}, SmsLog, {
-        id: string;
-    }, import("mongoose").DefaultSchemaOptions> & Omit<SmsLog & Required<{
-        _id: import("mongoose").Types.ObjectId;
-    }> & {
-        __v: number;
-    }, "id"> & {
-        id: string;
-    }> | undefined;
     message?: import("mongoose").SchemaDefinitionProperty<string, SmsLog, Document<unknown, {}, SmsLog, {
         id: string;
     }, import("mongoose").DefaultSchemaOptions> & Omit<SmsLog & Required<{
@@ -44,6 +35,15 @@ export declare const SmsLogSchema: import("mongoose").Schema<SmsLog, import("mon
         id: string;
     }> | undefined;
     status?: import("mongoose").SchemaDefinitionProperty<string, SmsLog, Document<unknown, {}, SmsLog, {
+        id: string;
+    }, import("mongoose").DefaultSchemaOptions> & Omit<SmsLog & Required<{
+        _id: import("mongoose").Types.ObjectId;
+    }> & {
+        __v: number;
+    }, "id"> & {
+        id: string;
+    }> | undefined;
+    recipient?: import("mongoose").SchemaDefinitionProperty<string, SmsLog, Document<unknown, {}, SmsLog, {
         id: string;
     }, import("mongoose").DefaultSchemaOptions> & Omit<SmsLog & Required<{
         _id: import("mongoose").Types.ObjectId;

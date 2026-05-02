@@ -25,6 +25,11 @@ export declare const ProductSchema: import("mongoose").Schema<Product, import("m
 }> & {
     __v: number;
 }, {
+    name?: import("mongoose").SchemaDefinitionProperty<string, Product, Document<unknown, {}, Product, {}, import("mongoose").DefaultSchemaOptions> & Product & Required<{
+        _id: import("mongoose").Types.ObjectId;
+    }> & {
+        __v: number;
+    }> | undefined;
     _id?: import("mongoose").SchemaDefinitionProperty<import("mongoose").Types.ObjectId, Product, Document<unknown, {}, Product, {}, import("mongoose").DefaultSchemaOptions> & Product & Required<{
         _id: import("mongoose").Types.ObjectId;
     }> & {
@@ -35,7 +40,7 @@ export declare const ProductSchema: import("mongoose").Schema<Product, import("m
     }> & {
         __v: number;
     }> | undefined;
-    name?: import("mongoose").SchemaDefinitionProperty<string, Product, Document<unknown, {}, Product, {}, import("mongoose").DefaultSchemaOptions> & Product & Required<{
+    desc?: import("mongoose").SchemaDefinitionProperty<string, Product, Document<unknown, {}, Product, {}, import("mongoose").DefaultSchemaOptions> & Product & Required<{
         _id: import("mongoose").Types.ObjectId;
     }> & {
         __v: number;
@@ -71,11 +76,6 @@ export declare const ProductSchema: import("mongoose").Schema<Product, import("m
         __v: number;
     }> | undefined;
     image2?: import("mongoose").SchemaDefinitionProperty<string | undefined, Product, Document<unknown, {}, Product, {}, import("mongoose").DefaultSchemaOptions> & Product & Required<{
-        _id: import("mongoose").Types.ObjectId;
-    }> & {
-        __v: number;
-    }> | undefined;
-    desc?: import("mongoose").SchemaDefinitionProperty<string, Product, Document<unknown, {}, Product, {}, import("mongoose").DefaultSchemaOptions> & Product & Required<{
         _id: import("mongoose").Types.ObjectId;
     }> & {
         __v: number;

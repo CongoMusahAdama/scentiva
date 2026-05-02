@@ -16,7 +16,7 @@ export declare const CustomerSchema: import("mongoose").Schema<Customer, import(
 }, "id"> & {
     id: string;
 }, {
-    _id?: import("mongoose").SchemaDefinitionProperty<import("mongoose").Types.ObjectId, Customer, Document<unknown, {}, Customer, {
+    name?: import("mongoose").SchemaDefinitionProperty<string, Customer, Document<unknown, {}, Customer, {
         id: string;
     }, import("mongoose").DefaultSchemaOptions> & Omit<Customer & Required<{
         _id: import("mongoose").Types.ObjectId;
@@ -25,7 +25,7 @@ export declare const CustomerSchema: import("mongoose").Schema<Customer, import(
     }, "id"> & {
         id: string;
     }> | undefined;
-    name?: import("mongoose").SchemaDefinitionProperty<string, Customer, Document<unknown, {}, Customer, {
+    _id?: import("mongoose").SchemaDefinitionProperty<import("mongoose").Types.ObjectId, Customer, Document<unknown, {}, Customer, {
         id: string;
     }, import("mongoose").DefaultSchemaOptions> & Omit<Customer & Required<{
         _id: import("mongoose").Types.ObjectId;

@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:3001/settings";
+const API_URL = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/settings`;
 
 const getHeaders = () => ({
   "Content-Type": "application/json",
