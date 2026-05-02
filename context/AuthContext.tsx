@@ -56,10 +56,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify({ phone, password }),
       });
 
-      const data = await response.json();
+      const contentType = response.headers.get("content-type");
+      let data;
+      if (contentType && contentType.includes("application/json")) {
+        data = await response.json();
+      }
 
       if (!response.ok) {
-        throw new Error(data.message || "Login failed");
+        if (response.status === 401) {
+          throw new Error("Invalid phone number or password. Please try again.");
+        }
+        throw new Error(data?.message || "An unexpected error occurred during login.");
       }
 
       if (data.requiresVerification) {
@@ -96,10 +103,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify(userData),
       });
 
-      const data = await response.json();
+      const contentType = response.headers.get("content-type");
+      let data;
+      if (contentType && contentType.includes("application/json")) {
+        data = await response.json();
+      }
 
       if (!response.ok) {
-        throw new Error(data.message || "Registration failed");
+        throw new Error(data?.message || "Registration failed. Please try again.");
       }
 
       router.push(`/verify-otp?phone=${encodeURIComponent(userData.phone)}`);
@@ -117,10 +128,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify({ phone, otp }),
       });
 
-      const data = await response.json();
+      const contentType = response.headers.get("content-type");
+      let data;
+      if (contentType && contentType.includes("application/json")) {
+        data = await response.json();
+      }
 
       if (!response.ok) {
-        throw new Error(data.message || "Verification failed");
+        throw new Error(data?.message || "Verification failed. Please try again.");
       }
 
       setToken(data.access_token);

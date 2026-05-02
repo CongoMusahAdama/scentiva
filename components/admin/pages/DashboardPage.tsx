@@ -125,7 +125,9 @@ export default function DashboardPage() {
   useEffect(() => {
     if (!token) return;
 
-    fetch("http://localhost:3001/admin/dashboard", {
+    const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+    
+    fetch(`${API_URL}/admin/dashboard`, {
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -136,8 +138,8 @@ export default function DashboardPage() {
       setLoading(false);
     })
     .catch(err => {
-      console.error(err);
-      showError("Dashboard Sync Failed", "Unable to load real-time metrics from the backend.");
+      console.error("Dashboard Sync Error:", err);
+      // Silenced intrusive showError to improve UX on refresh
       setLoading(false);
     });
   }, [token]);
