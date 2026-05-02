@@ -70,6 +70,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       if (data.requiresVerification) {
+        if (data.otp) console.log(`[TEST] Verification Code: ${data.otp}`);
         router.push(`/verify-otp?phone=${encodeURIComponent(data.phone)}`);
         return;
       }
@@ -113,6 +114,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error(data?.message || "Registration failed. Please try again.");
       }
 
+      if (data.otp) console.log(`[TEST] Verification Code: ${data.otp}`);
       router.push(`/verify-otp?phone=${encodeURIComponent(userData.phone)}`);
     } catch (error) {
       console.error("Signup error:", error);
@@ -164,10 +166,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify({ phone }),
       });
 
+      const data = await response.json();
       if (!response.ok) {
-        const data = await response.json();
         throw new Error(data.message || "Failed to resend OTP");
       }
+      if (data.otp) console.log(`[TEST] Resent Verification Code: ${data.otp}`);
     } catch (error) {
       console.error("Resend error:", error);
       throw error;

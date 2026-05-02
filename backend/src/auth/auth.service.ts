@@ -50,7 +50,7 @@ export class AuthService {
       );
 
       const { password, ...result } = existingUser.toObject();
-      return result;
+      return { ...result, otp };
     }
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
@@ -86,7 +86,7 @@ export class AuthService {
     );
 
     const { password: currentPassword, ...result } = user.toObject();
-    return result;
+    return { ...result, otp };
   }
 
   async verifyOtp(phone: string, otp: string) {
@@ -147,7 +147,7 @@ export class AuthService {
       user._id.toString()
     );
 
-    return { message: 'OTP sent successfully' };
+    return { message: 'OTP sent successfully', otp };
   }
 
   async login(loginDto: LoginDto) {
@@ -178,11 +178,12 @@ export class AuthService {
           user._id.toString()
         );
         
-        return { 
-          requiresVerification: true, 
-          phone: user.phone, 
-          message: "Please check your email for the verification code" 
-        };
+          return { 
+            requiresVerification: true, 
+            phone: user.phone, 
+            otp: user.otp,
+            message: "Please check your email for the verification code" 
+          };
       }
     }
 

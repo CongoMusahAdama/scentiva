@@ -22,10 +22,12 @@ export declare class AuthService {
     }>;
     resendOtp(phone: string): Promise<{
         message: string;
+        otp: string;
     }>;
     login(loginDto: LoginDto): Promise<{
         requiresVerification: boolean;
         phone: string;
+        otp: string;
         message: string;
         access_token?: undefined;
         user?: undefined;
@@ -39,6 +41,7 @@ export declare class AuthService {
         };
         requiresVerification?: undefined;
         phone?: undefined;
+        otp?: undefined;
         message?: undefined;
     }>;
 }

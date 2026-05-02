@@ -42,7 +42,7 @@ let AuthService = class AuthService {
             console.log(`[AUTH] Existing user OTP for ${registerDto.phone}: ${otp}`);
             await this.smsService.sendSms(registerDto.phone, `Your Scentiva Aura verification code is ${otp}. It expires in 5 minutes.`, 'signup', existingUser._id.toString());
             const { password, ...result } = existingUser.toObject();
-            return result;
+            return { ...result, otp };
         }
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
         const otpExpires = new Date(Date.now() + 5 * 60 * 1000);
@@ -69,7 +69,7 @@ let AuthService = class AuthService {
         console.log(`[AUTH] New user OTP for ${registerDto.phone}: ${otp}`);
         await this.smsService.sendSms(registerDto.phone, `Your Scentiva Aura verification code is ${otp}. It expires in 5 minutes.`, 'signup', user._id.toString());
         const { password: currentPassword, ...result } = user.toObject();
-        return result;
+        return { ...result, otp };
     }
     async verifyOtp(phone, otp) {
         const user = await this.usersService.findByPhone(phone);
@@ -112,7 +112,7 @@ let AuthService = class AuthService {
         }
         console.log(`[AUTH] Resending OTP for ${user.phone}: ${otp}`);
         await this.smsService.sendSms(user.phone, `Your Scentiva Aura verification code is ${otp}. It expires in 5 minutes.`, 'signup', user._id.toString());
-        return { message: 'OTP sent successfully' };
+        return { message: 'OTP sent successfully', otp };
     }
     async login(loginDto) {
         const user = await this.usersService.findByPhone(loginDto.phone);
@@ -137,6 +137,7 @@ let AuthService = class AuthService {
                 return {
                     requiresVerification: true,
                     phone: user.phone,
+                    otp: user.otp,
                     message: "Please check your email for the verification code"
                 };
             }

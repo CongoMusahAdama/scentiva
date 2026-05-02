@@ -8,6 +8,7 @@ export declare class AuthController {
     login(loginDto: LoginDto): Promise<{
         requiresVerification: boolean;
         phone: string;
+        otp: string;
         message: string;
         access_token?: undefined;
         user?: undefined;
@@ -21,6 +22,7 @@ export declare class AuthController {
         };
         requiresVerification?: undefined;
         phone?: undefined;
+        otp?: undefined;
         message?: undefined;
     }>;
     verifyOtp(body: {
@@ -39,6 +41,7 @@ export declare class AuthController {
         phone: string;
     }): Promise<{
         message: string;
+        otp: string;
     }>;
     getProfile(req: any): any;
 }
