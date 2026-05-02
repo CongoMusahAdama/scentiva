@@ -39,6 +39,7 @@ let AuthService = class AuthService {
             if (registerDto.email) {
                 await this.mailService.sendOtp(registerDto.email, otp);
             }
+            console.log(`[AUTH] Existing user OTP for ${registerDto.phone}: ${otp}`);
             await this.smsService.sendSms(registerDto.phone, `Your Scentiva Aura verification code is ${otp}. It expires in 5 minutes.`, 'signup', existingUser._id.toString());
             const { password, ...result } = existingUser.toObject();
             return result;
@@ -65,6 +66,7 @@ let AuthService = class AuthService {
         if (registerDto.email) {
             await this.mailService.sendOtp(registerDto.email, otp);
         }
+        console.log(`[AUTH] New user OTP for ${registerDto.phone}: ${otp}`);
         await this.smsService.sendSms(registerDto.phone, `Your Scentiva Aura verification code is ${otp}. It expires in 5 minutes.`, 'signup', user._id.toString());
         const { password: currentPassword, ...result } = user.toObject();
         return result;
@@ -108,6 +110,7 @@ let AuthService = class AuthService {
         if (user.email) {
             await this.mailService.sendOtp(user.email, otp);
         }
+        console.log(`[AUTH] Resending OTP for ${user.phone}: ${otp}`);
         await this.smsService.sendSms(user.phone, `Your Scentiva Aura verification code is ${otp}. It expires in 5 minutes.`, 'signup', user._id.toString());
         return { message: 'OTP sent successfully' };
     }
@@ -129,6 +132,7 @@ let AuthService = class AuthService {
                 if (user.email) {
                     await this.mailService.sendOtp(user.email, otp);
                 }
+                console.log(`[AUTH] Login required OTP for ${user.phone}: ${otp}`);
                 await this.smsService.sendSms(user.phone, `Your Scentiva Aura verification code is ${otp}. It expires in 5 minutes.`, 'signup', user._id.toString());
                 return {
                     requiresVerification: true,

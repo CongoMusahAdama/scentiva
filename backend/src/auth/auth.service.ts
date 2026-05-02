@@ -41,6 +41,7 @@ export class AuthService {
         await this.mailService.sendOtp(registerDto.email, otp);
       }
 
+      console.log(`[AUTH] Existing user OTP for ${registerDto.phone}: ${otp}`);
       await this.smsService.sendSms(
         registerDto.phone,
         `Your Scentiva Aura verification code is ${otp}. It expires in 5 minutes.`,
@@ -76,6 +77,7 @@ export class AuthService {
       await this.mailService.sendOtp(registerDto.email, otp);
     }
 
+    console.log(`[AUTH] New user OTP for ${registerDto.phone}: ${otp}`);
     await this.smsService.sendSms(
       registerDto.phone,
       `Your Scentiva Aura verification code is ${otp}. It expires in 5 minutes.`,
@@ -137,6 +139,7 @@ export class AuthService {
       await this.mailService.sendOtp(user.email, otp);
     }
 
+    console.log(`[AUTH] Resending OTP for ${user.phone}: ${otp}`);
     await this.smsService.sendSms(
       user.phone,
       `Your Scentiva Aura verification code is ${otp}. It expires in 5 minutes.`,
@@ -167,6 +170,7 @@ export class AuthService {
           await this.mailService.sendOtp(user.email, otp);
         }
 
+        console.log(`[AUTH] Login required OTP for ${user.phone}: ${otp}`);
         await this.smsService.sendSms(
           user.phone,
           `Your Scentiva Aura verification code is ${otp}. It expires in 5 minutes.`,
