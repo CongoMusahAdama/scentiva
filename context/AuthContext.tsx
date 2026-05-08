@@ -34,7 +34,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:3001";
 
   useEffect(() => {
     // Try to load from cookies first (better for SSR/Middleware)
@@ -49,17 +49,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, []);
 
   const login = async (phone: string, password: string) => {
+    console.log(`[AUTH] Attempting login for: ${phone} at ${API_URL}`);
     try {
       const response = await fetch(`${API_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phone, password }),
       });
+      console.log(`[AUTH] Response received: ${response.status} ${response.statusText}`);
 
       const contentType = response.headers.get("content-type");
       let data;
       if (contentType && contentType.includes("application/json")) {
         data = await response.json();
+        console.log(`[AUTH] Response data:`, data);
       }
 
       if (!response.ok) {
@@ -83,6 +86,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       Cookies.set("scentiva_user", JSON.stringify(data.user), { expires: 7 });
 
       if (data.user.role?.toUpperCase() === "ADMIN") {
+        localStorage.setItem("adminToken", data.access_token);
         showSuccess("Welcome Admin", "Successfully logged into the dashboard");
         router.push("/admin");
       } else {
@@ -148,6 +152,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       Cookies.set("scentiva_user", JSON.stringify(data.user), { expires: 7 });
 
       if (data.user.role?.toUpperCase() === "ADMIN") {
+        localStorage.setItem("adminToken", data.access_token);
         router.push("/admin");
       } else {
         router.push("/dashboard");

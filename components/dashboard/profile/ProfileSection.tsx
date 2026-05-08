@@ -20,7 +20,7 @@ export default function ProfileSection() {
   const [previewImage, setPreviewImage] = useState<string | null>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:3001";
   const token = Cookies.get("scentiva_token");
 
   const handleUpdate = async (e: React.FormEvent) => {

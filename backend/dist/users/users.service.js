@@ -31,19 +31,39 @@ let UsersService = class UsersService {
     }
     async seedAdmin() {
         const adminEmail = 'amusahcongo@gmail.com';
+        const adminPhone = '0000000000';
         const adminPassword = 'Musah@scentivaadmin12345';
-        const existingAdmin = await this.userModel.findOne({ email: adminEmail });
-        if (!existingAdmin) {
-            const hashedPassword = await bcrypt.hash(adminPassword, 10);
-            await this.userModel.create({
-                phone: '0000000000',
-                email: adminEmail,
-                password: hashedPassword,
-                fullName: 'Scentiva Admin',
-                role: user_schema_1.UserRole.ADMIN,
-                isVerified: false,
+        try {
+            const existingAdmin = await this.userModel.findOne({
+                $or: [{ email: adminEmail }, { phone: adminPhone }]
             });
-            console.log('✅ Default admin user created');
+            if (!existingAdmin) {
+                const hashedPassword = await bcrypt.hash(adminPassword, 10);
+                await this.userModel.create({
+                    phone: adminPhone,
+                    email: adminEmail,
+                    password: hashedPassword,
+                    fullName: 'Scentiva Admin',
+                    role: user_schema_1.UserRole.ADMIN,
+                    isVerified: true,
+                });
+                console.log('✅ Default admin user created');
+            }
+            else {
+                if (existingAdmin.role === user_schema_1.UserRole.ADMIN && !existingAdmin.isVerified) {
+                    existingAdmin.isVerified = true;
+                    await existingAdmin.save();
+                    console.log('✅ Default admin user verified');
+                }
+            }
+        }
+        catch (error) {
+            if (error.code === 11000) {
+                console.warn('⚠️ Admin user already exists (duplicate key). skipping seed.');
+            }
+            else {
+                console.error('❌ Error seeding admin user:', error);
+            }
         }
     }
     async findByPhone(identifier) {

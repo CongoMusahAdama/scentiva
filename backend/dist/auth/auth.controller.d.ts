@@ -6,13 +6,6 @@ export declare class AuthController {
     constructor(authService: AuthService);
     register(registerDto: RegisterDto): Promise<any>;
     login(loginDto: LoginDto): Promise<{
-        requiresVerification: boolean;
-        phone: string;
-        otp: string;
-        message: string;
-        access_token?: undefined;
-        user?: undefined;
-    } | {
         access_token: string;
         user: {
             id: string;
@@ -20,10 +13,11 @@ export declare class AuthController {
             fullName: string;
             role: import("../users/schemas/user.schema").UserRole;
         };
-        requiresVerification?: undefined;
-        phone?: undefined;
-        otp?: undefined;
-        message?: undefined;
+    } | {
+        requiresVerification: boolean;
+        phone: string;
+        otp: string;
+        message: string;
     }>;
     verifyOtp(body: {
         phone: string;

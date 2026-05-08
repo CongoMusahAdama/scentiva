@@ -95,6 +95,7 @@ const FeaturedProducts = () => {
                       src={product.image}
                       alt={product.name}
                       fill
+                      sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, (max-width: 1280px) 25vw, 20vw"
                       className={`object-cover transition-transform duration-700 group-hover:scale-110 ${product.status === "sold-out" ? "grayscale opacity-80" : ""}`}
                     />
                     <div className="absolute inset-0 bg-deep-noir/20 group-hover:bg-deep-noir/5 transition-colors duration-500" />

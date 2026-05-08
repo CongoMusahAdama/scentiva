@@ -115,25 +115,33 @@ let AuthService = class AuthService {
         return { message: 'OTP sent successfully', otp };
     }
     async login(loginDto) {
+        console.time(`login-${loginDto.phone}`);
         const user = await this.usersService.findByPhone(loginDto.phone);
+        console.timeLog(`login-${loginDto.phone}`, 'User found');
         if (!user) {
+            console.timeEnd(`login-${loginDto.phone}`);
             throw new common_1.UnauthorizedException('Invalid credentials');
         }
         if (!user.isVerified) {
             if (user.role?.toUpperCase() === 'ADMIN') {
                 user.isVerified = true;
                 await user.save();
+                console.timeLog(`login-${loginDto.phone}`, 'Admin verified and saved');
             }
             else {
                 const otp = Math.floor(100000 + Math.random() * 900000).toString();
                 user.otp = otp;
                 user.otpExpires = new Date(Date.now() + 5 * 60 * 1000);
                 await user.save();
+                console.timeLog(`login-${loginDto.phone}`, 'User OTP saved');
                 if (user.email) {
                     await this.mailService.sendOtp(user.email, otp);
+                    console.timeLog(`login-${loginDto.phone}`, 'Mail sent');
                 }
                 console.log(`[AUTH] Login required OTP for ${user.phone}: ${otp}`);
                 await this.smsService.sendSms(user.phone, `Your Scentiva Aura verification code is ${otp}. It expires in 5 minutes.`, 'signup', user._id.toString());
+                console.timeLog(`login-${loginDto.phone}`, 'SMS sent');
+                console.timeEnd(`login-${loginDto.phone}`);
                 return {
                     requiresVerification: true,
                     phone: user.phone,
@@ -143,11 +151,13 @@ let AuthService = class AuthService {
             }
         }
         const isPasswordValid = await bcrypt.compare(loginDto.password, user.password);
+        console.timeLog(`login-${loginDto.phone}`, 'Password compared');
         if (!isPasswordValid) {
+            console.timeEnd(`login-${loginDto.phone}`);
             throw new common_1.UnauthorizedException('Invalid credentials');
         }
         const payload = { phone: user.phone, sub: user._id.toString(), role: user.role };
-        return {
+        const result = {
             access_token: this.jwtService.sign(payload),
             user: {
                 id: user._id.toString(),
@@ -156,6 +166,8 @@ let AuthService = class AuthService {
                 role: user.role,
             },
         };
+        console.timeEnd(`login-${loginDto.phone}`);
+        return result;
     }
 };
 exports.AuthService = AuthService;

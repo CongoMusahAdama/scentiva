@@ -15,6 +15,7 @@ const Hero = () => {
           src="/image.png"
           alt="Scentiva Aura Hero"
           fill
+          sizes="100vw"
           className="object-cover"
           style={{ objectPosition: 'center 15%' }}
           priority

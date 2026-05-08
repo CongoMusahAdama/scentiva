@@ -73,6 +73,7 @@ export default function SigninPage() {
                   src="/01_primary_logo_transparent.png" 
                   alt="Scentiva Aura Logo" 
                   fill
+                  sizes="80px"
                   className="object-contain"
                 />
               </div>

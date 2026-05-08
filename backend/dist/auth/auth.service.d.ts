@@ -25,13 +25,6 @@ export declare class AuthService {
         otp: string;
     }>;
     login(loginDto: LoginDto): Promise<{
-        requiresVerification: boolean;
-        phone: string;
-        otp: string;
-        message: string;
-        access_token?: undefined;
-        user?: undefined;
-    } | {
         access_token: string;
         user: {
             id: string;
@@ -39,9 +32,10 @@ export declare class AuthService {
             fullName: string;
             role: import("../users/schemas/user.schema").UserRole;
         };
-        requiresVerification?: undefined;
-        phone?: undefined;
-        otp?: undefined;
-        message?: undefined;
+    } | {
+        requiresVerification: boolean;
+        phone: string;
+        otp: string;
+        message: string;
     }>;
 }
