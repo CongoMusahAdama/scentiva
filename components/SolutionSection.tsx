@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 
 const SolutionSection = () => {
   return (
-    <section className="py-24 bg-deep-noir">
+    <section id="approach" className="py-24 bg-surface">
       <div className="container mx-auto px-6 flex flex-col items-center">
         <motion.div 
           initial={{ opacity: 0, scale: 0.95 }}

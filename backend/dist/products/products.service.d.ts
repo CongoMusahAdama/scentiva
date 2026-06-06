@@ -1,9 +1,12 @@
+import { OnModuleInit } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { Product } from './schemas/product.schema';
 import { CreateProductDto, UpdateProductDto } from './dto/product.dto';
-export declare class ProductsService {
+export declare class ProductsService implements OnModuleInit {
     private productModel;
     constructor(productModel: Model<Product>);
+    onModuleInit(): Promise<void>;
+    seedProducts(): Promise<void>;
     create(createProductDto: CreateProductDto): Promise<Product>;
     findAll(): Promise<Product[]>;
     findOne(id: string): Promise<Product>;

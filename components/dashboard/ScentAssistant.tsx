@@ -62,7 +62,11 @@ const ScentAssistant = ({ onViewProduct }: { onViewProduct: (product: any) => vo
   };
 
   const generateRecommendation = (finalAnswers: Record<string, string>) => {
-    if (products.length === 0) return;
+    if (products.length === 0) {
+      setResult("no-match");
+      setStep(steps.length);
+      return;
+    }
 
     // Matching Algorithm
     const scoredProducts = products.map(product => {
@@ -135,15 +139,15 @@ const ScentAssistant = ({ onViewProduct }: { onViewProduct: (product: any) => vo
                 <h3 className="text-2xl md:text-3xl font-serif text-[#1A1B23] mt-8 font-bold uppercase tracking-tight">{steps[step].question}</h3>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
                 {steps[step].options.map((opt) => (
-                  <button
+                   <button
                     key={opt}
                     onClick={() => handleOption(opt)}
-                    className="group flex items-center justify-between bg-white border border-[#E8E9EC] p-6 text-[12px] font-bold uppercase tracking-widest text-[#9CA3AF] hover:border-[#1A1B23] hover:text-[#1A1B23] transition-all"
+                    className="group flex items-center justify-between bg-white border border-[#F0F1F4] p-6 text-[12px] font-bold uppercase tracking-widest text-[#9CA3AF] hover:border-[#1A1B23] hover:text-[#1A1B23] hover:bg-[#F9FAFB] transition-all duration-300"
                   >
                     {opt}
-                    <ChevronRight size={14} className="opacity-0 group-hover:opacity-100 transition-all" />
+                    <ChevronRight size={14} className="opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
                   </button>
                 ))}
               </div>

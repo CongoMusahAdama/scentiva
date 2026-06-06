@@ -7,4 +7,5 @@ export declare class CustomersService {
     findAll(): Promise<Customer[]>;
     create(customerDto: CustomerDto): Promise<Customer>;
     delete(id: string): Promise<Customer>;
+    deleteAll(): Promise<number>;
 }

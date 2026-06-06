@@ -5,6 +5,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { ArrowUpRight } from "lucide-react";
+import { ScrollEyebrow, ScrollHeading } from "@/components/ScrollReveal";
 
 const categories = [
   {
@@ -35,27 +36,20 @@ const categories = [
 
 const CategoriesSection = () => {
   return (
-    <section id="categories" className="py-24 bg-deep-noir">
+    <section id="categories" className="py-24 bg-surface">
       <div className="container mx-auto px-6">
         <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
           <div className="max-w-xl">
-            <motion.h2 
-              initial={{ opacity: 0, x: -20 }}
-              whileInView={{ opacity: 1, x: 0 }}
-              viewport={{ once: true }}
-              className="text-sm uppercase tracking-[0.4em] text-gold-oud mb-4"
-            >
+            <ScrollEyebrow className="text-sm uppercase tracking-[0.4em] text-gold-oud mb-4">
               Our Collections
-            </motion.h2>
-            <motion.h3 
-              initial={{ opacity: 0, y: 30 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: 0.1 }}
+            </ScrollEyebrow>
+            <ScrollHeading
+              as="h3"
+              delay={0.12}
               className="text-4xl md:text-5xl font-serif text-parchment leading-tight"
             >
               Curated for every identity
-            </motion.h3>
+            </ScrollHeading>
           </div>
         </div>
 
@@ -67,7 +61,7 @@ const CategoriesSection = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ delay: index * 0.1, duration: 0.8 }}
-              className="group relative h-[500px] overflow-hidden bg-[#111114] border border-white/5 cursor-pointer"
+              className="group relative h-[500px] overflow-hidden bg-elevated border border-parchment/5 cursor-pointer"
             >
               <Link href={`/shop?category=${cat.id}`} className="absolute inset-0 z-10" aria-label={`View ${cat.name}`} />
               <Image 
@@ -75,17 +69,17 @@ const CategoriesSection = () => {
                 alt={cat.name} 
                 fill 
                 sizes="(max-width: 768px) 100vw, (max-width: 1024px) 50vw, 25vw"
-                className="object-cover opacity-60 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700 pointer-events-none"
+                className="object-cover group-hover:scale-105 transition-transform duration-700 pointer-events-none"
               />
-              <div className="absolute inset-0 bg-gradient-to-t from-black via-transparent to-transparent pointer-events-none" />
+              <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/10 to-transparent pointer-events-none" />
               
               <div className="absolute inset-0 p-8 flex flex-col justify-end pointer-events-none">
-                <p className="text-[10px] uppercase tracking-[0.3em] text-gold-oud mb-2 opacity-60 group-hover:opacity-100 transition-opacity">
+                <p className="text-[10px] uppercase tracking-[0.3em] text-gold-oud mb-2">
                   {cat.tag}
                 </p>
-                <h4 className="text-2xl font-serif text-parchment mb-6">{cat.name}</h4>
+                <h4 className="text-2xl font-serif text-white mb-6">{cat.name}</h4>
                 
-                <div className="w-12 h-12 rounded-full border border-parchment/20 flex items-center justify-center text-parchment group-hover:bg-gold-oud group-hover:border-gold-oud group-hover:text-deep-noir transition-all duration-500">
+                <div className="w-12 h-12 rounded-full border border-white/30 flex items-center justify-center text-white group-hover:bg-gold-oud group-hover:border-gold-oud group-hover:text-deep-noir transition-all duration-500">
                   <ArrowUpRight size={20} />
                 </div>
               </div>

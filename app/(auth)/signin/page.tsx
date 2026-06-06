@@ -1,15 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Phone, Lock, ArrowRight, ChevronLeft, Loader2 } from "lucide-react";
 import Swal from "sweetalert2";
 import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
 
-export default function SigninPage() {
+function SigninContent() {
   const { login } = useAuth();
+  const searchParams = useSearchParams();
+  const returnTo = searchParams.get("returnTo") || undefined;
   const [formData, setFormData] = useState({
     phone: "",
     password: "",
@@ -20,7 +23,7 @@ export default function SigninPage() {
     e.preventDefault();
     setLoading(true);
     try {
-      await login(formData.phone, formData.password);
+      await login(formData.phone, formData.password, returnTo);
     } catch (err: any) {
       Swal.fire({
         icon: 'error',
@@ -152,5 +155,13 @@ export default function SigninPage() {
 
       </div>
     </main>
+  );
+}
+
+export default function SigninPage() {
+  return (
+    <Suspense fallback={null}>
+      <SigninContent />
+    </Suspense>
   );
 }

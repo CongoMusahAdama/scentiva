@@ -17,9 +17,28 @@ const common_1 = require("@nestjs/common");
 const mongoose_1 = require("@nestjs/mongoose");
 const mongoose_2 = require("mongoose");
 const product_schema_1 = require("./schemas/product.schema");
+const product_seed_data_1 = require("./product-seed.data");
 let ProductsService = class ProductsService {
     constructor(productModel) {
         this.productModel = productModel;
+    }
+    async onModuleInit() {
+        await this.seedProducts();
+    }
+    async seedProducts() {
+        try {
+            for (const product of product_seed_data_1.PRODUCT_SEED_DATA) {
+                await this.productModel.findOneAndUpdate({ id: product.id }, {
+                    ...product,
+                    status: product.status ?? 'in-stock',
+                    costPrice: product.costPrice ?? 0,
+                }, { upsert: true, new: true, setDefaultsOnInsert: true });
+            }
+            console.log(`✅ Seeded ${product_seed_data_1.PRODUCT_SEED_DATA.length} products`);
+        }
+        catch (error) {
+            console.error('❌ Error seeding products:', error);
+        }
     }
     async create(createProductDto) {
         const newProduct = new this.productModel(createProductDto);

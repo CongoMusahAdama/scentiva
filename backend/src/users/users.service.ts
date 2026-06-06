@@ -1,10 +1,16 @@
 import { Injectable, OnModuleInit, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
-import { User, UserRole } from './schemas/user.schema';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
+import { User, UserRole } from './schemas/user.schema';
 import { ProductsService } from '../products/products.service';
+
+export const ADMIN_CREDENTIALS = {
+  email: 'amusahcongo@gmail.com',
+  phone: '0000000000',
+  password: 'Musah@scentivaadmin12345',
+} as const;
 
 @Injectable()
 export class UsersService implements OnModuleInit {
@@ -19,10 +25,13 @@ export class UsersService implements OnModuleInit {
     await this.seedAdmin();
   }
 
+  async deleteAllCustomers(): Promise<number> {
+    const result = await this.userModel.deleteMany({ role: UserRole.CUSTOMER }).exec();
+    return result.deletedCount;
+  }
+
   private async seedAdmin() {
-    const adminEmail = 'amusahcongo@gmail.com';
-    const adminPhone = '0000000000';
-    const adminPassword = 'Musah@scentivaadmin12345';
+    const { email: adminEmail, phone: adminPhone, password: adminPassword } = ADMIN_CREDENTIALS;
 
     try {
       const existingAdmin = await this.userModel.findOne({ 

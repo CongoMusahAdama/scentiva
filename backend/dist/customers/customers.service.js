@@ -35,6 +35,10 @@ let CustomersService = class CustomersService {
         }
         return customer;
     }
+    async deleteAll() {
+        const result = await this.customerModel.deleteMany({}).exec();
+        return result.deletedCount;
+    }
 };
 exports.CustomersService = CustomersService;
 exports.CustomersService = CustomersService = __decorate([

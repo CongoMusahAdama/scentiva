@@ -12,11 +12,16 @@ var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UsersService = void 0;
+exports.UsersService = exports.ADMIN_CREDENTIALS = void 0;
 const common_1 = require("@nestjs/common");
 const mongoose_1 = require("@nestjs/mongoose");
 const mongoose_2 = require("mongoose");
 const user_schema_1 = require("./schemas/user.schema");
+exports.ADMIN_CREDENTIALS = {
+    email: 'amusahcongo@gmail.com',
+    phone: '0000000000',
+    password: 'Musah@scentivaadmin12345',
+};
 const config_1 = require("@nestjs/config");
 const bcrypt = require("bcrypt");
 const products_service_1 = require("../products/products.service");

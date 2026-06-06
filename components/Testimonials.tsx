@@ -24,7 +24,7 @@ const reviews = [
 
 const Testimonials = () => {
   return (
-    <section className="py-24 bg-deep-noir border-t border-parchment/5" id="reviews">
+    <section className="py-24 bg-surface border-t border-parchment/5" id="reviews">
       <div className="container mx-auto px-6">
         <div className="text-center mb-16 overflow-hidden">
           <motion.div

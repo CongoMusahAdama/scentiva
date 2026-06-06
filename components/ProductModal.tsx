@@ -9,6 +9,8 @@ import {
 } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
+import { WishlistService } from "@/lib/services/wishlist.service";
+import { showSuccess, showError } from "@/lib/swal";
 
 const iconMap: Record<string, React.ElementType> = {
   Moon, Heart, Landmark, Sun, GraduationCap, Briefcase, 
@@ -49,17 +51,54 @@ const ProductModal = ({ product, onClose }: Props) => {
   const { user } = useAuth();
 
   const [activeImageIndex, setActiveImageIndex] = useState(0);
+  const [isWishlisted, setIsWishlisted] = useState(false);
+  const [wishlistLoading, setWishlistLoading] = useState(false);
 
   // Lock body scroll when open
   useEffect(() => {
     if (product) {
       document.body.style.overflow = "hidden";
       setActiveImageIndex(0);
+      checkWishlistStatus();
     } else {
       document.body.style.overflow = "";
     }
     return () => { document.body.style.overflow = ""; };
   }, [product]);
+
+  const checkWishlistStatus = async () => {
+    if (!user || !product) return;
+    try {
+      const wishlist = await WishlistService.getWishlist();
+      const inWishlist = wishlist.some((item: any) => 
+        (typeof item === 'string' ? item === product.id : item.id === product.id)
+      );
+      setIsWishlisted(inWishlist);
+    } catch (err) {
+      console.error("Wishlist check error:", err);
+    }
+  };
+
+  const handleToggleWishlist = async () => {
+    if (!user) {
+      showError("Login Required", "Please sign in to add items to your wishlist.");
+      return;
+    }
+
+    setWishlistLoading(true);
+    try {
+      await WishlistService.toggleWishlist(product!.id);
+      setIsWishlisted(!isWishlisted);
+      showSuccess(
+        isWishlisted ? "Removed" : "Added", 
+        `${product!.name} has been ${isWishlisted ? "removed from" : "added to"} your wishlist.`
+      );
+    } catch (err: any) {
+      showError("Error", err.message || "Failed to update wishlist.");
+    } finally {
+      setWishlistLoading(false);
+    }
+  };
 
   // Close on Escape key
   useEffect(() => {
@@ -91,7 +130,7 @@ const ProductModal = ({ product, onClose }: Props) => {
       <div
         className="
           relative w-full md:max-w-4xl
-          bg-[#111114] border-t md:border border-parchment/10
+          bg-elevated border-t md:border border-parchment/10
           rounded-t-2xl md:rounded-xl
           shadow-2xl
           flex flex-col
@@ -128,7 +167,7 @@ const ProductModal = ({ product, onClose }: Props) => {
               className={`object-cover md:rounded-bl-xl transition-all duration-500 ${product.status === "sold-out" ? "grayscale opacity-80" : ""}`}
             />
             {/* Gradient overlay */}
-            <div className="absolute inset-0 bg-gradient-to-t from-[#111114] via-transparent to-transparent md:bg-gradient-to-r pointer-events-none" />
+            <div className="absolute inset-0 bg-gradient-to-t from-surface/90 via-transparent to-transparent md:bg-gradient-to-r pointer-events-none" />
             
             {/* Badges */}
             <div className="absolute top-3 left-3 flex flex-col gap-2 pointer-events-none">
@@ -238,7 +277,7 @@ const ProductModal = ({ product, onClose }: Props) => {
                   {product.whenToApply.map((w, i) => {
                     const IconComp = iconMap[w.icon] || Clock;
                     return (
-                      <div key={i} className="bg-white/5 border border-parchment/8 rounded-lg p-2.5 text-center flex flex-col items-center">
+                      <div key={i} className="bg-parchment/5 border border-parchment/8 rounded-lg p-2.5 text-center flex flex-col items-center">
                         <div className="text-gold-oud mb-1.5">
                           <IconComp size={18} strokeWidth={1.5} />
                         </div>
@@ -252,7 +291,7 @@ const ProductModal = ({ product, onClose }: Props) => {
             </div>
 
             {/* ── Pinned CTA bar — always visible, never scrolls away ── */}
-            <div className="flex-shrink-0 p-4 md:px-8 md:pb-8 bg-[#111114] border-t border-parchment/8 flex flex-col gap-2.5">
+            <div className="flex-shrink-0 p-4 md:px-8 md:pb-8 bg-elevated border-t border-parchment/8 flex flex-col gap-2.5">
               {product.status === "sold-out" ? (
                 <>
                   <p className="text-[10px] text-center text-parchment/60 uppercase tracking-widest mb-1">
@@ -280,18 +319,32 @@ const ProductModal = ({ product, onClose }: Props) => {
                     rel="noopener noreferrer"
                     className="w-full bg-gradient-to-r from-[#075E54] to-[#128C7E] text-white py-4 text-[10px] font-bold uppercase tracking-[0.3em] flex items-center justify-center gap-3 hover:shadow-[0_0_30px_rgba(37,211,102,0.3)] hover:scale-[1.01] active:scale-[0.98] transition-all duration-300 rounded-lg group shadow-xl relative overflow-hidden"
                   >
-                    <div className="absolute inset-0 bg-white/10 opacity-0 group-hover:opacity-100 transition-opacity" />
+                    <div className="absolute inset-0 bg-parchment/10 opacity-0 group-hover:opacity-100 transition-opacity" />
                     <MessageCircle size={16} fill="white" className="animate-pulse" />
                     Order via WhatsApp
                   </a>
                   
-                  <button 
-                    onClick={handleAddToCart}
-                    className="w-full bg-gold-oud text-deep-noir py-3.5 text-xs font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-2 hover:bg-parchment active:scale-[0.98] transition-all duration-200 rounded-sm"
-                  >
-                    <ShoppingCart size={14} />
-                    Add to Bag — GH₵ {product.actual}
-                  </button>
+                  <div className="flex gap-2">
+                    <button 
+                      onClick={handleAddToCart}
+                      className="flex-1 bg-gold-oud text-deep-noir py-3.5 text-xs font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-2 hover:bg-parchment active:scale-[0.98] transition-all duration-200 rounded-sm"
+                    >
+                      <ShoppingCart size={14} />
+                      Add to Bag — GH₵ {product.actual}
+                    </button>
+                    
+                    <button 
+                      onClick={handleToggleWishlist}
+                      disabled={wishlistLoading}
+                      className={`px-4 flex items-center justify-center border transition-all duration-300 rounded-sm ${
+                        isWishlisted 
+                          ? "bg-rose-500/10 border-rose-500/50 text-rose-500" 
+                          : "border-parchment/20 text-parchment hover:border-parchment/40"
+                      }`}
+                    >
+                      <Heart size={18} fill={isWishlisted ? "currentColor" : "none"} className={wishlistLoading ? "animate-pulse" : ""} />
+                    </button>
+                  </div>
                 </>
               )}
             </div>

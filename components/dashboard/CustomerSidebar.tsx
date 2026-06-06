@@ -13,6 +13,7 @@ import { showConfirm } from "@/lib/swal";
 
 const menuItems = [
   { id: "overview", label: "Overview", icon: <LayoutDashboard size={18} /> },
+  { id: "shop", label: "Shop", icon: <ShoppingBag size={18} />, isLink: true, href: "/shop" },
   { id: "orders", label: "Orders", icon: <ShoppingBag size={18} /> },
   { id: "wishlist", label: "Wishlist", icon: <Heart size={18} /> },
   { id: "reviews", label: "Reviews", icon: <Star size={18} /> },
@@ -102,22 +103,15 @@ export default function CustomerSidebar({
         <LogoArea />
 
         <nav className="flex-1 py-4 px-3 flex flex-col gap-1 overflow-y-auto">
-          {menuItems.map((item) => {
+          {menuItems.map((item: any) => {
             const active = activeTab === item.id;
-            return (
-              <button
-                key={item.id}
-                onClick={() => {
-                  setActiveTab(item.id);
-                  setMobileOpen(false);
-                }}
-                className={`group flex items-center gap-4 p-4 transition-all relative ${
-                  active 
-                    ? "bg-[#D8B34B]/10 text-[#D8B34B]" 
-                    : "text-[#9CA3AF] hover:text-[#1A1B23] hover:bg-[#F5F6FA]"
-                }`}
-                style={{ borderRadius: "0px" }}
-              >
+            const content = (
+              <div className={`group flex items-center gap-4 p-4 transition-all relative w-full ${
+                active 
+                  ? "bg-[#D8B34B]/10 text-[#D8B34B]" 
+                  : "text-[#9CA3AF] hover:text-[#1A1B23] hover:bg-[#F5F6FA]"
+              }`}
+              style={{ borderRadius: "0px" }}>
                 <span className={`${active ? "text-[#D8B34B]" : "text-[#9CA3AF] group-hover:text-[#1A1B23]"}`}>
                   {item.icon}
                 </span>
@@ -132,6 +126,27 @@ export default function CustomerSidebar({
                     className="absolute left-0 w-1 h-3/5 bg-[#D8B34B]"
                   />
                 )}
+              </div>
+            );
+
+            if (item.isLink) {
+              return (
+                <Link key={item.id} href={item.href} className="w-full">
+                  {content}
+                </Link>
+              );
+            }
+
+            return (
+              <button
+                key={item.id}
+                onClick={() => {
+                  setActiveTab(item.id);
+                  setMobileOpen(false);
+                }}
+                className="w-full"
+              >
+                {content}
               </button>
             );
           })}

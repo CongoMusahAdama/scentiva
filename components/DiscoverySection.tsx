@@ -29,7 +29,7 @@ const categories = [
 
 const DiscoverySection = () => {
   return (
-    <section className="py-24 bg-[#0F0F12]">
+    <section className="py-24 bg-elevated">
       <div className="container mx-auto px-6">
         <div className="max-w-xl mb-16 overflow-hidden">
           <motion.div
@@ -58,7 +58,7 @@ const DiscoverySection = () => {
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
               transition={{ duration: 0.8, delay: index * 0.1 }}
-              className="group p-10 border border-parchment/5 bg-deep-noir hover:bg-[#151518] hover:border-gold-oud/30 transition-all duration-500 cursor-pointer"
+              className="group p-10 border border-parchment/5 bg-surface hover:bg-parchment/5 hover:border-gold-oud/30 transition-all duration-500 cursor-pointer"
             >
               <div className="text-gold-oud mb-8 group-hover:scale-110 transition-transform duration-500">
                 {cat.icon}

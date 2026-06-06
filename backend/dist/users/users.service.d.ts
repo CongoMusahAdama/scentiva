@@ -1,6 +1,11 @@
 import { OnModuleInit } from '@nestjs/common';
 import { Model } from 'mongoose';
 import { User } from './schemas/user.schema';
+export declare const ADMIN_CREDENTIALS: {
+    readonly email: "amusahcongo@gmail.com";
+    readonly phone: "0000000000";
+    readonly password: "Musah@scentivaadmin12345";
+};
 import { ConfigService } from '@nestjs/config';
 import { ProductsService } from '../products/products.service';
 export declare class UsersService implements OnModuleInit {

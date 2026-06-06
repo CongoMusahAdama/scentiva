@@ -138,13 +138,13 @@ export default function ScentAssistantModal({
               initial={{ opacity: 0, scale: 0.9, y: 20 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.9, y: 20 }}
-              className="relative w-full max-w-2xl bg-[#0F0F12] border border-white/10 overflow-hidden shadow-3xl"
+              className="relative w-full max-w-2xl bg-elevated border border-parchment/10 overflow-hidden shadow-3xl"
               style={{ borderRadius: "0px" }}
             >
               {/* Close */}
               <button 
                 onClick={onClose}
-                className="absolute top-6 right-6 text-white/40 hover:text-white transition-colors z-10"
+                className="absolute top-6 right-6 text-parchment/40 hover:text-parchment transition-colors z-10"
               >
                 <X size={24} />
               </button>
@@ -171,7 +171,7 @@ export default function ScentAssistantModal({
                           <button
                             key={opt}
                             onClick={() => handleOption(opt)}
-                            className="group flex items-center justify-between bg-white/5 border border-white/10 p-6 text-[12px] font-bold uppercase tracking-widest text-white/50 hover:border-gold-oud hover:text-gold-oud transition-all"
+                            className="group flex items-center justify-between bg-parchment/5 border border-parchment/10 p-6 text-[12px] font-bold uppercase tracking-widest text-parchment/50 hover:border-gold-oud hover:text-gold-oud transition-all"
                           >
                             {opt}
                             <ChevronRight size={14} className="opacity-0 group-hover:opacity-100 transition-all translate-x-[-10px] group-hover:translate-x-0" />
@@ -186,8 +186,8 @@ export default function ScentAssistantModal({
                       className="w-full"
                     >
                       {result === "no-match" ? (
-                        <div className="border border-white/10 p-10 text-center flex flex-col items-center bg-white/[0.02]">
-                          <div className="w-14 h-14 bg-white/5 rounded-full flex items-center justify-center mb-6">
+                        <div className="border border-parchment/10 p-10 text-center flex flex-col items-center bg-parchment/[0.03]">
+                          <div className="w-14 h-14 bg-parchment/5 rounded-full flex items-center justify-center mb-6">
                             <Sparkles className="text-gold-oud" size={20} />
                           </div>
                           <h4 className="text-2xl font-serif text-parchment mb-4 font-bold uppercase tracking-tight">No Perfect Match Found</h4>
@@ -198,20 +198,20 @@ export default function ScentAssistantModal({
                             <a 
                               href="https://wa.me/233506626068"
                               target="_blank"
-                              className="px-8 bg-gold-oud text-deep-noir py-4 text-[10px] font-bold uppercase tracking-widest hover:bg-parchment transition-all"
+                              className="px-8 bg-gold-oud text-deep-noir py-4 text-[10px] font-bold uppercase tracking-widest hover:bg-deep-noir hover:text-surface transition-all"
                             >
                               Contact Support
                             </a>
                             <button 
                               onClick={reset}
-                              className="px-6 border border-white/10 text-white/40 hover:text-white transition-all"
+                              className="px-6 border border-parchment/10 text-parchment/40 hover:text-parchment transition-all"
                             >
                               <RefreshCcw size={16} />
                             </button>
                           </div>
                         </div>
                       ) : (
-                        <div className="flex flex-col md:flex-row items-stretch text-left border border-white/10 bg-white/[0.02]">
+                        <div className="flex flex-col md:flex-row items-stretch text-left border border-parchment/10 bg-parchment/[0.03]">
                           <div className="relative w-full md:w-56 h-72 overflow-hidden shrink-0">
                             <Image src={result?.image} alt={result?.name} fill sizes="224px" className="object-cover" />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
@@ -229,13 +229,13 @@ export default function ScentAssistantModal({
                             <div className="flex gap-2">
                               <button 
                                 onClick={() => setShowProduct(true)}
-                                className="flex-1 bg-gold-oud text-deep-noir py-4 text-[10px] font-bold uppercase tracking-widest hover:bg-parchment transition-all shadow-xl shadow-gold-oud/10"
+                                className="flex-1 bg-gold-oud text-deep-noir py-4 text-[10px] font-bold uppercase tracking-widest hover:bg-deep-noir hover:text-surface transition-all shadow-xl shadow-gold-oud/10"
                               >
                                 View Details
                               </button>
                               <button 
                                 onClick={reset}
-                                className="px-6 border border-white/10 text-white/40 hover:text-white transition-all"
+                                className="px-6 border border-parchment/10 text-parchment/40 hover:text-parchment transition-all"
                               >
                                 <RefreshCcw size={16} />
                               </button>

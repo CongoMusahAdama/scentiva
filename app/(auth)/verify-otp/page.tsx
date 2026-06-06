@@ -12,6 +12,7 @@ function VerifyOtpContent() {
   const { verifyOtp, resendOtp } = useAuth();
   const searchParams = useSearchParams();
   const phone = searchParams.get("phone") || "";
+  const returnTo = searchParams.get("returnTo") || undefined;
   
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   const [loading, setLoading] = useState(false);
@@ -62,7 +63,7 @@ function VerifyOtpContent() {
 
     setLoading(true);
     try {
-      await verifyOtp(phone, otpString);
+      await verifyOtp(phone, otpString, returnTo);
       Swal.fire({
         icon: 'success',
         title: 'Identity Verified',

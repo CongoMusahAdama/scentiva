@@ -146,7 +146,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
               times: [0, 0.4, 0.8, 1],
               ease: [0.16, 1, 0.3, 1] 
             }}
-            className="fixed pointer-events-none z-[500] w-6 h-6 bg-gold-oud rounded-full shadow-[0_0_35px_rgba(212,175,55,1),0_0_10px_rgba(255,255,255,0.5)] border border-white/20"
+            className="fixed pointer-events-none z-[500] w-6 h-6 bg-gold-oud rounded-full shadow-[0_0_35px_rgba(212,175,55,1),0_0_10px_rgba(255,255,255,0.5)] border border-parchment/20"
           />
         )}
       </AnimatePresence>
@@ -162,7 +162,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
             transition={{ type: "spring", stiffness: 380, damping: 28 }}
             className="fixed bottom-6 left-4 right-4 md:left-auto md:right-6 md:w-80 z-[400] pointer-events-none"
           >
-            <div className="relative bg-[#0f0f12] border border-parchment/15 rounded-2xl p-3.5 shadow-[0_8px_40px_rgba(0,0,0,0.6)] overflow-hidden flex items-center gap-3.5">
+            <div className="relative bg-elevated border border-parchment/15 rounded-2xl p-3.5 shadow-[0_8px_40px_rgba(0,0,0,0.6)] overflow-hidden flex items-center gap-3.5">
               {/* Gold shimmer bar at top */}
               <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-gold-oud to-transparent" />
 
@@ -222,7 +222,7 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
             initial={{ opacity: 0, y: 50, scale: 0.9 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, scale: 0.9 }}
-            className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[300] bg-[#111114] text-parchment px-8 py-3.5 rounded-full flex items-center gap-3 shadow-2xl border border-parchment/10"
+            className="fixed bottom-10 left-1/2 -translate-x-1/2 z-[300] bg-elevated text-parchment px-8 py-3.5 rounded-full flex items-center gap-3 shadow-2xl border border-parchment/10"
           >
             <CheckCircle2 size={18} className="text-emerald-500" />
             <span className="text-xs font-bold uppercase tracking-[0.2em] whitespace-nowrap">{toast}</span>

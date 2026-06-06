@@ -1,15 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useState, Suspense } from "react";
 import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { motion } from "framer-motion";
 import { Phone, Lock, User, Mail, ArrowRight, ChevronLeft, Check, Loader2 } from "lucide-react";
 import Swal from "sweetalert2";
 import Image from "next/image";
 import { useAuth } from "@/context/AuthContext";
 
-export default function SignupPage() {
+function SignupContent() {
   const { signup } = useAuth();
+  const searchParams = useSearchParams();
+  const returnTo = searchParams.get("returnTo") || undefined;
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -50,6 +53,7 @@ export default function SignupPage() {
         email: formData.email,
         phone: formData.phone,
         password: formData.password,
+        returnTo,
       });
       Swal.fire({
         icon: 'success',
@@ -236,5 +240,13 @@ export default function SignupPage() {
         </div>
       </div>
     </main>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={null}>
+      <SignupContent />
+    </Suspense>
   );
 }

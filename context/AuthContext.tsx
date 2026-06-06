@@ -18,15 +18,18 @@ interface AuthContextType {
   user: User | null;
   token: string | null;
   isLoading: boolean;
-  login: (phone: string, password: string) => Promise<void>;
+  login: (phone: string, password: string, returnTo?: string) => Promise<void>;
   signup: (userData: any) => Promise<void>;
-  verifyOtp: (phone: string, otp: string) => Promise<void>;
+  verifyOtp: (phone: string, otp: string, returnTo?: string) => Promise<void>;
   resendOtp: (phone: string) => Promise<void>;
   logout: () => void;
   updateUser: (userData: Partial<User>) => void;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
+
+const safeReturnTo = (path?: string | null) =>
+  path && path.startsWith("/") && !path.startsWith("//") ? path : null;
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
@@ -48,7 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setIsLoading(false);
   }, []);
 
-  const login = async (phone: string, password: string) => {
+  const login = async (phone: string, password: string, returnTo?: string) => {
     console.log(`[AUTH] Attempting login for: ${phone} at ${API_URL}`);
     try {
       const response = await fetch(`${API_URL}/auth/login`, {
@@ -74,7 +77,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
       if (data.requiresVerification) {
         if (data.otp) console.log(`[TEST] Verification Code: ${data.otp}`);
-        router.push(`/verify-otp?phone=${encodeURIComponent(data.phone)}`);
+        const otpUrl = new URLSearchParams({ phone: data.phone });
+        const redirect = safeReturnTo(returnTo);
+        if (redirect) otpUrl.set("returnTo", redirect);
+        router.push(`/verify-otp?${otpUrl.toString()}`);
         return;
       }
 
@@ -91,7 +97,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         router.push("/admin");
       } else {
         showSuccess("Welcome Back", "Successfully logged in");
-        router.push("/dashboard");
+        router.push(safeReturnTo(returnTo) || "/dashboard");
       }
     } catch (error: any) {
       console.error("Login error:", error);
@@ -119,14 +125,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
 
       if (data.otp) console.log(`[TEST] Verification Code: ${data.otp}`);
-      router.push(`/verify-otp?phone=${encodeURIComponent(userData.phone)}`);
+      const otpUrl = new URLSearchParams({ phone: userData.phone });
+      const redirect = safeReturnTo(userData.returnTo);
+      if (redirect) otpUrl.set("returnTo", redirect);
+      router.push(`/verify-otp?${otpUrl.toString()}`);
     } catch (error) {
       console.error("Signup error:", error);
       throw error;
     }
   };
 
-  const verifyOtp = async (phone: string, otp: string) => {
+  const verifyOtp = async (phone: string, otp: string, returnTo?: string) => {
     try {
       const response = await fetch(`${API_URL}/auth/verify-otp`, {
         method: "POST",
@@ -155,7 +164,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         localStorage.setItem("adminToken", data.access_token);
         router.push("/admin");
       } else {
-        router.push("/dashboard");
+        router.push(safeReturnTo(returnTo) || "/dashboard");
       }
     } catch (error) {
       console.error("Verification error:", error);

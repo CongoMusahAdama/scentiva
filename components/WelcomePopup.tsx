@@ -42,7 +42,7 @@ const WelcomePopup = () => {
             animate={{ scale: 1, opacity: 1, rotate: 0 }}
             exit={{ scale: 0.8, opacity: 0 }}
             transition={{ type: "spring", damping: 20, stiffness: 100 }}
-            className="relative w-full max-w-[400px] aspect-square rounded-full bg-[#1A1A1D] border-4 border-parchment/5 flex flex-col items-center justify-center text-center shadow-[0_0_100px_rgba(0,0,0,0.8),inset_0_0_60px_rgba(212,175,55,0.05)] overflow-hidden group"
+            className="relative w-full max-w-[400px] aspect-square rounded-full bg-elevated border-4 border-parchment/10 flex flex-col items-center justify-center text-center shadow-[0_20px_60px_rgba(26,27,35,0.15),inset_0_0_60px_rgba(212,175,55,0.05)] overflow-hidden group"
           >
             {/* Subtle Texture Overlay */}
             <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/dark-wood.png')]" />
@@ -88,7 +88,7 @@ const WelcomePopup = () => {
               animate={{ opacity: 1 }}
               transition={{ delay: 1 }}
               onClick={closePopup}
-              className="mt-8 px-8 py-3 bg-gold-oud text-deep-noir text-[10px] font-bold uppercase tracking-[0.3em] rounded-full hover:bg-parchment transition-all duration-300 shadow-lg"
+              className="mt-8 px-8 py-3 bg-gold-oud text-deep-noir text-[10px] font-bold uppercase tracking-[0.3em] rounded-full hover:bg-deep-noir hover:text-surface transition-all duration-300 shadow-lg"
             >
               Enter Boutique
             </motion.button>

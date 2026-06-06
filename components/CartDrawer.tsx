@@ -46,10 +46,10 @@ const CartDrawer = ({ isOpen, onClose }: Props) => {
             animate={{ x: 0 }}
             exit={{ x: "100%" }}
             transition={{ type: "spring", damping: 25, stiffness: 200 }}
-            className="fixed right-0 top-0 h-full w-full max-w-md bg-[#0D0D0F] border-l border-parchment/10 z-[101] flex flex-col shadow-2xl"
+            className="fixed right-0 top-0 h-full w-full max-w-md bg-surface border-l border-parchment/10 z-[101] flex flex-col shadow-2xl"
           >
             {/* Header */}
-            <div className="p-6 border-b border-parchment/10 flex justify-between items-center bg-[#111114]">
+            <div className="p-6 border-b border-parchment/10 flex justify-between items-center bg-elevated">
               <div className="flex items-center gap-3">
                 <ShoppingBag className="text-gold-oud" size={20} />
                 <h2 className="text-sm uppercase tracking-[0.3em] text-parchment font-bold">Your Bag ({totalItems})</h2>
@@ -80,7 +80,7 @@ const CartDrawer = ({ isOpen, onClose }: Props) => {
                 <div className="space-y-6">
                   {cart.map((item) => (
                     <div key={item.id} className="flex gap-4 group">
-                      <div className="relative w-24 h-28 flex-shrink-0 bg-white/5 overflow-hidden rounded-sm">
+                      <div className="relative w-24 h-28 flex-shrink-0 bg-parchment/5 overflow-hidden rounded-sm">
                         <Image src={item.image} alt={item.name} fill className="object-cover" />
                       </div>
                       <div className="flex-1 flex flex-col justify-between py-1">
@@ -108,14 +108,14 @@ const CartDrawer = ({ isOpen, onClose }: Props) => {
 
             {/* Footer */}
             {cart.length > 0 && (
-              <div className="p-8 border-t border-parchment/10 bg-[#111114] space-y-6">
+              <div className="p-8 border-t border-parchment/10 bg-elevated space-y-6">
                 <div className="flex justify-between items-end">
                   <span className="text-xs uppercase tracking-[0.2em] text-parchment/40">Estimated Total</span>
                   <span className="text-2xl font-serif text-gold-oud">GH₵ {totalPrice}</span>
                 </div>
                 <button 
                   onClick={handleWhatsAppCheckout}
-                  className="w-full bg-gold-oud text-deep-noir py-5 text-xs font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-emerald-500 hover:text-white transition-all duration-500 rounded-sm shadow-xl group"
+                  className="w-full bg-gold-oud text-deep-noir py-5 text-xs font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-emerald-500 hover:text-parchment transition-all duration-500 rounded-sm shadow-xl group"
                 >
                   <MessageSquare size={18} className="group-hover:scale-110 transition-transform" />
                   Order via WhatsApp

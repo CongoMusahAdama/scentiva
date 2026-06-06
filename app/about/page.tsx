@@ -21,7 +21,7 @@ const AboutPage = () => {
   };
 
   return (
-    <main className="min-h-screen bg-[#0D0D0F] text-parchment overflow-x-hidden">
+    <main className="min-h-screen bg-surface text-parchment overflow-x-hidden">
       <Navbar />
 
       {/* ── Hero Section ── */}
@@ -42,7 +42,7 @@ const AboutPage = () => {
               initial={{ y: "100%" }}
               animate={{ y: 0 }}
               transition={{ duration: 1.5, ease: [0.16, 1, 0.3, 1] }}
-              className="text-5xl md:text-8xl font-serif leading-none"
+              className="text-5xl md:text-8xl font-serif leading-none text-white"
             >
               The Beginning of <br /> <span className="italic text-shimmer">Scentiva Aura</span>
             </motion.h1>
@@ -93,7 +93,7 @@ const AboutPage = () => {
       </section>
 
       {/* ── Core Values ── */}
-      <section className="py-24 bg-[#111114]">
+      <section className="py-24 bg-white">
         <div className="container mx-auto px-6">
           <div className="text-center max-w-2xl mx-auto mb-20">
             <h2 className="text-2xl md:text-4xl font-serif mb-6">Our Foundational Promises</h2>
@@ -148,7 +148,7 @@ const AboutPage = () => {
       </section>
 
       {/* ── CTA ── */}
-      <section className="py-24 border-t border-white/5">
+      <section className="py-24 border-t border-parchment/5">
         <div className="container mx-auto px-6 text-center">
           <h2 className="text-2xl font-serif mb-10 text-parchment/60">Be part of our first collection</h2>
           <motion.div
@@ -158,7 +158,7 @@ const AboutPage = () => {
           >
             <a 
               href="/shop" 
-              className="px-16 py-6 bg-gold-oud text-deep-noir font-bold uppercase tracking-[0.2em] text-xs hover:bg-parchment transition-all duration-500 shadow-2xl block"
+              className="px-16 py-6 bg-gold-oud text-deep-noir font-bold uppercase tracking-[0.2em] text-xs hover:bg-deep-noir hover:text-surface transition-all duration-500 shadow-2xl block"
             >
               Explore Launch Collection
             </a>

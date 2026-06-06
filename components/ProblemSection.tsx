@@ -24,7 +24,7 @@ const ProblemSection = () => {
   ];
 
   return (
-    <section className="py-24 bg-deep-noir border-y border-parchment/5">
+    <section id="challenge" className="py-24 bg-surface border-y border-parchment/5">
       <div className="container mx-auto px-6">
         <div className="text-center mb-16 overflow-hidden">
           <motion.div

@@ -3,31 +3,32 @@
 import React, { useState } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
-import { RefreshCcw, ChevronRight, Check, Loader2, Sparkles } from "lucide-react";
+import { RefreshCcw, Check, Sparkles } from "lucide-react";
 import { ProductService } from "@/lib/services/product.service";
 import ProductModal from "./ProductModal";
+import { ScrollEyebrow, ScrollHeading, ScrollText } from "@/components/ScrollReveal";
 
 const steps = [
   {
     question: "What best describes your personality?",
     options: ["Calm", "Bold", "Energetic", "Elegant"],
-    key: "personality"
+    key: "personality",
   },
   {
     question: "Select your primary usage need:",
     options: ["Work", "Dates", "Daily wear", "Events"],
-    key: "need"
+    key: "need",
   },
   {
     question: "What climate do you naturally gravitate towards?",
     options: ["Warm & Sun-Drenched", "Cool Harmattan Breeze", "Fresh Tropical Rains", "Crisp & Dry"],
-    key: "climate"
+    key: "climate",
   },
   {
     question: "What fragrance notes intrigue you the most?",
     options: ["Deep & Woody", "Fresh & Citrusy", "Rich & Spicy", "Soft & Floral"],
-    key: "notes"
-  }
+    key: "notes",
+  },
 ];
 
 export default function ScentAssistantSection() {
@@ -70,8 +71,7 @@ export default function ScentAssistantSection() {
       return;
     }
 
-    // Matching Algorithm
-    const scoredProducts = products.map(product => {
+    const scoredProducts = products.map((product) => {
       let score = 0;
       const combinedText = `
         ${product.name} 
@@ -82,9 +82,9 @@ export default function ScentAssistantSection() {
         ${product.pros?.join(" ")}
       `.toLowerCase();
 
-      Object.values(finalAnswers).forEach(answer => {
+      Object.values(finalAnswers).forEach((answer) => {
         const keywords = answer.toLowerCase().split(/[ &]/);
-        keywords.forEach(keyword => {
+        keywords.forEach((keyword) => {
           if (keyword.length > 2 && combinedText.includes(keyword)) {
             score += 1;
           }
@@ -99,7 +99,7 @@ export default function ScentAssistantSection() {
     });
 
     const sorted = scoredProducts.sort((a, b) => b.score - a.score);
-    
+
     if (sorted[0] && sorted[0].score > 0) {
       setResult(sorted[0]);
     } else {
@@ -114,108 +114,154 @@ export default function ScentAssistantSection() {
     setResult(null);
   };
 
-  return (
-    <section id="scent-assistant" className="py-16 bg-deep-noir overflow-hidden relative">
-      {/* Background Decor */}
-      <div className="absolute top-0 right-0 w-1/3 h-full bg-gold-oud/5 blur-[120px] pointer-events-none" />
-      <div className="absolute bottom-0 left-0 w-1/4 h-3/4 bg-gold-oud/5 blur-[100px] pointer-events-none" />
+  const progress = step < steps.length ? ((step + 1) / steps.length) * 100 : 100;
 
-      <div className="container mx-auto px-6 relative z-10">
-        <div className="max-w-4xl mx-auto">
-          
-          <div className="text-center mb-10">
-            <h2 className="text-[11px] font-bold uppercase tracking-[0.5em] text-gold-oud mb-4">Discovery Experience</h2>
-            <h3 className="text-4xl md:text-5xl lg:text-6xl font-serif text-parchment font-bold leading-tight">Find Your Signature</h3>
-            <p className="text-parchment/40 text-sm mt-4 max-w-lg mx-auto">Answer a few questions and our AI will match you with a fragrance that fits your lifestyle.</p>
+  return (
+    <section id="scent-assistant" className="py-10 md:py-16 bg-surface relative">
+      <div className="absolute top-0 right-0 w-1/3 h-full bg-gold-oud/5 blur-[120px] pointer-events-none" />
+
+      <div className="container mx-auto px-4 sm:px-6 relative z-10">
+        <div className="max-w-3xl mx-auto">
+          {/* Compact header */}
+          <div className="text-center mb-5 md:mb-8">
+            <ScrollEyebrow className="text-[10px] font-bold uppercase tracking-[0.4em] text-gold-oud mb-2">
+              Discovery Experience
+            </ScrollEyebrow>
+            <ScrollHeading
+              as="h3"
+              className="text-2xl sm:text-3xl md:text-5xl font-serif text-parchment font-bold leading-tight"
+            >
+              Find Your Signature
+            </ScrollHeading>
+            <ScrollText
+              delay={0.25}
+              className="text-parchment/50 text-xs md:text-sm mt-2 max-w-md mx-auto hidden sm:block"
+            >
+              Answer a few quick questions — we&apos;ll match you with a fragrance for your lifestyle.
+            </ScrollText>
           </div>
 
-          <div className="relative min-h-[380px] flex items-center justify-center bg-white/[0.02] border border-white/5 p-6 md:p-10">
+          {/* Quiz card — shorter on mobile */}
+          <div className="border border-parchment/10 bg-elevated p-4 sm:p-6 md:p-8">
+            {step < steps.length && (
+              <div className="mb-4 md:mb-6">
+                <div className="flex items-center justify-between text-[9px] uppercase tracking-widest text-parchment/40 mb-2">
+                  <span>Step {step + 1} of {steps.length}</span>
+                  <span>{Math.round(progress)}%</span>
+                </div>
+                <div className="h-1 bg-parchment/10 rounded-full overflow-hidden">
+                  <motion.div
+                    className="h-full bg-gold-oud"
+                    initial={{ width: 0 }}
+                    animate={{ width: `${progress}%` }}
+                    transition={{ duration: 0.3 }}
+                  />
+                </div>
+              </div>
+            )}
+
             <AnimatePresence mode="wait">
               {step < steps.length ? (
                 <motion.div
                   key={step}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  className="w-full"
+                  initial={{ opacity: 0, x: 8 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: -8 }}
+                  transition={{ duration: 0.2 }}
                 >
-                  <div className="text-center mb-12">
-                    <span className="text-[10px] font-bold uppercase tracking-[0.4em] text-gold-oud/60">Stage {step + 1} of {steps.length}</span>
-                    <h4 className="text-2xl md:text-3xl font-serif text-parchment mt-6 font-medium uppercase tracking-tight">{steps[step].question}</h4>
-                  </div>
+                  <h4 className="text-sm sm:text-lg md:text-2xl font-serif text-parchment font-medium uppercase tracking-tight text-center mb-4 md:mb-6 leading-snug">
+                    {steps[step].question}
+                  </h4>
 
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 max-w-2xl mx-auto">
+                  {/* 2×2 grid on mobile — much shorter than 4 stacked rows */}
+                  <div className="grid grid-cols-2 gap-2 sm:gap-3 max-w-xl mx-auto">
                     {steps[step].options.map((opt) => (
                       <button
                         key={opt}
+                        type="button"
                         onClick={() => handleOption(opt)}
-                        className="group flex items-center justify-between bg-white/[0.03] border border-white/10 p-6 text-[12px] font-bold uppercase tracking-widest text-white/50 hover:border-gold-oud hover:text-gold-oud hover:bg-gold-oud/5 transition-all"
+                        disabled={loadingProducts}
+                        className="flex items-center justify-center text-center min-h-[52px] sm:min-h-[60px] px-2 py-3 sm:p-4 border border-parchment/15 bg-surface text-[10px] sm:text-[11px] font-bold uppercase tracking-wide text-parchment/70 hover:border-gold-oud hover:text-gold-oud hover:bg-gold-oud/5 transition-all leading-tight"
                       >
                         {opt}
-                        <ChevronRight size={14} className="opacity-0 group-hover:opacity-100 transition-all" />
                       </button>
                     ))}
                   </div>
                 </motion.div>
               ) : (
                 <motion.div
-                  initial={{ opacity: 0, scale: 0.95 }}
+                  initial={{ opacity: 0, scale: 0.98 }}
                   animate={{ opacity: 1, scale: 1 }}
                   className="w-full"
                 >
                   {result === "no-match" ? (
-                    <div className="border border-white/10 p-12 text-center flex flex-col items-center bg-white/[0.02]">
-                      <div className="w-16 h-16 bg-white/5 rounded-full flex items-center justify-center mb-6">
-                        <Sparkles className="text-gold-oud" size={24} />
+                    <div className="text-center py-6 md:py-10 px-2">
+                      <div className="w-12 h-12 bg-gold-oud/10 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <Sparkles className="text-gold-oud" size={20} />
                       </div>
-                      <h4 className="text-2xl font-serif text-parchment mb-4 font-bold uppercase tracking-tight">No Perfect Match Found</h4>
-                      <p className="text-parchment/40 text-sm leading-relaxed mb-8 max-w-md mx-auto">
-                        Your preferences are unique! Our Scent Curators can help you find a bespoke fragrance that matches your aura perfectly.
+                      <h4 className="text-lg md:text-2xl font-serif text-parchment mb-2 font-bold uppercase">
+                        No Perfect Match Found
+                      </h4>
+                      <p className="text-parchment/50 text-xs md:text-sm mb-5 max-w-sm mx-auto">
+                        Our curators can help you find a bespoke fragrance.
                       </p>
-                      <div className="flex gap-4">
-                        <a 
+                      <div className="flex flex-wrap justify-center gap-2">
+                        <a
                           href="https://wa.me/233506626068"
                           target="_blank"
-                          className="px-10 bg-gold-oud text-deep-noir py-4 text-[10px] font-bold uppercase tracking-widest hover:bg-parchment transition-all"
+                          rel="noopener noreferrer"
+                          className="px-6 bg-gold-oud text-deep-noir py-2.5 text-[10px] font-bold uppercase tracking-widest hover:bg-deep-noir hover:text-surface transition-all"
                         >
                           Contact Support
                         </a>
-                        <button 
+                        <button
+                          type="button"
                           onClick={reset}
-                          className="px-6 border border-white/10 text-white/40 hover:text-white transition-all"
+                          className="px-4 py-2.5 border border-parchment/15 text-parchment/50 hover:text-parchment transition-all"
+                          aria-label="Start over"
                         >
-                          <RefreshCcw size={16} />
+                          <RefreshCcw size={14} />
                         </button>
                       </div>
                     </div>
                   ) : (
-                    <div className="flex flex-col md:flex-row items-stretch bg-white/[0.03] border border-white/10">
-                      <div className="relative w-full md:w-72 h-80 overflow-hidden shrink-0">
-                        <Image src={result?.image} alt={result?.name} fill sizes="288px" className="object-cover" />
-                        <div className="absolute inset-0 bg-gradient-to-t from-deep-noir/80 to-transparent" />
+                    <div className="flex flex-col sm:flex-row gap-4 md:gap-6">
+                      <div className="relative w-full sm:w-40 md:w-52 h-40 sm:h-auto sm:min-h-[180px] shrink-0 overflow-hidden">
+                        <Image
+                          src={result?.image}
+                          alt={result?.name}
+                          fill
+                          sizes="(max-width: 640px) 100vw, 208px"
+                          className="object-cover"
+                        />
                       </div>
-                      
-                      <div className="p-10 flex-1 flex flex-col justify-center">
-                        <div className="flex items-center gap-2 text-emerald-400 mb-4">
-                          <Check size={14} strokeWidth={3} />
-                          <span className="text-[9px] font-bold uppercase tracking-widest">Match Discovered</span>
+
+                      <div className="flex-1 flex flex-col justify-center text-center sm:text-left">
+                        <div className="flex items-center justify-center sm:justify-start gap-1.5 text-emerald-500 mb-2">
+                          <Check size={12} strokeWidth={3} />
+                          <span className="text-[9px] font-bold uppercase tracking-widest">Match Found</span>
                         </div>
-                        
-                        <h4 className="text-3xl md:text-4xl font-serif text-parchment mb-3 font-bold uppercase leading-tight">{result?.name}</h4>
-                        <p className="text-parchment/40 text-sm leading-relaxed mb-10">{result?.desc}</p>
-                        
-                        <div className="flex gap-3">
-                          <button 
+                        <h4 className="text-xl md:text-3xl font-serif text-parchment mb-2 font-bold uppercase leading-tight">
+                          {result?.name}
+                        </h4>
+                        <p className="text-parchment/50 text-xs md:text-sm leading-relaxed mb-4 line-clamp-2 md:line-clamp-none">
+                          {result?.desc}
+                        </p>
+                        <div className="flex flex-wrap justify-center sm:justify-start gap-2">
+                          <button
+                            type="button"
                             onClick={() => setShowProduct(true)}
-                            className="flex-1 bg-gold-oud text-deep-noir py-4 text-[10px] font-bold uppercase tracking-widest hover:bg-parchment transition-all shadow-xl shadow-gold-oud/10"
+                            className="px-6 bg-gold-oud text-deep-noir py-2.5 text-[10px] font-bold uppercase tracking-widest hover:bg-deep-noir hover:text-surface transition-all"
                           >
                             View Fragrance
                           </button>
-                          <button 
+                          <button
+                            type="button"
                             onClick={reset}
-                            className="px-6 border border-white/10 text-white/40 hover:text-white transition-all"
+                            className="px-4 py-2.5 border border-parchment/15 text-parchment/50 hover:text-parchment transition-all"
+                            aria-label="Start over"
                           >
-                            <RefreshCcw size={16} />
+                            <RefreshCcw size={14} />
                           </button>
                         </div>
                       </div>

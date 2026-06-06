@@ -1,48 +1,218 @@
 @tailwind base;
+
 @tailwind components;
+
 @tailwind utilities;
 
-:root {
-  --background: #0D0D0F;
-  --foreground: #FFF4DE;
+
+
+/* Light theme (default) */
+
+:root,
+
+.light {
+
+  --background: 255 255 255;
+
+  --foreground: 26 27 35;
+
+  --surface: 255 255 255;
+
+  --elevated: 255 255 255;
+
+  --carbon: 229 229 234;
+
+  --smoke: 107 114 128;
+
+  --color-ink: 26 27 35;
+
+  color-scheme: light;
+
 }
+
+
+
+/* Dark theme */
+
+.dark {
+
+  --background: 13 13 15;
+
+  --foreground: 255 244 222;
+
+  --surface: 13 13 15;
+
+  --elevated: 17 17 20;
+
+  --carbon: 35 36 40;
+
+  --smoke: 78 79 84;
+
+  --color-ink: 26 27 35;
+
+  color-scheme: dark;
+
+}
+
+
+
+body,
+
+input,
+
+textarea,
+
+button,
+
+select {
+
+  font-family: "Courier New", Courier, monospace;
+
+  font-size: 12px;
+
+  line-height: 1.7;
+
+  font-weight: 700;
+
+  font-style: normal;
+
+  -webkit-font-smoothing: antialiased;
+
+  -webkit-text-size-adjust: 100%;
+
+}
+
+
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+
+  background: rgb(var(--background));
+
+  color: rgb(var(--foreground));
+
+  transition: background-color 0.2s ease, color 0.2s ease;
+
 }
+
+
+
+h1,
+
+h2,
+
+h3,
+
+h4,
+
+h5,
+
+h6 {
+
+  font-family: inherit;
+
+  font-weight: 700;
+
+}
+
+
+
+.font-serif,
+
+.font-lora,
+
+.font-poppins {
+
+  font-family: "Courier New", Courier, monospace;
+
+}
+
+
 
 @layer utilities {
+
   .no-scrollbar::-webkit-scrollbar {
+
     display: none;
+
   }
+
   .no-scrollbar {
+
     -ms-overflow-style: none;
+
     scrollbar-width: none;
+
   }
+
+
+
+  .hero-headline {
+
+    font-family: "Courier New", Courier, monospace;
+
+    font-weight: 700;
+
+    line-height: 1.25;
+
+    -webkit-font-smoothing: antialiased;
+
+    text-shadow:
+      0 2px 4px rgba(0, 0, 0, 0.9),
+      0 4px 16px rgba(0, 0, 0, 0.7),
+      0 0 32px rgba(0, 0, 0, 0.5);
+
+  }
+
 }
+
+
 
 /* SweetAlert2 Custom Styling */
+
 .scentiva-swal-popup {
+
   border-radius: 0px !important;
+
   border: 1px solid rgba(216, 179, 75, 0.2) !important;
+
   padding: 2rem !important;
+
 }
+
+
 
 .scentiva-swal-confirm {
+
   background-color: #D8B34B !important;
+
   color: #1A1B23 !important;
+
   border-radius: 0px !important;
+
   padding: 10px 24px !important;
+
   text-transform: uppercase !important;
+
   letter-spacing: 0.05em !important;
+
 }
 
+
+
 .scentiva-swal-cancel {
+
   background-color: #F3F4F6 !important;
+
   color: #6B7280 !important;
+
   border-radius: 0px !important;
+
   padding: 10px 24px !important;
+
   text-transform: uppercase !important;
+
   letter-spacing: 0.05em !important;
+
 }
+
+

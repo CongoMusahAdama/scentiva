@@ -24,4 +24,9 @@ export class CustomersService {
     }
     return customer;
   }
+
+  async deleteAll(): Promise<number> {
+    const result = await this.customerModel.deleteMany({}).exec();
+    return result.deletedCount;
+  }
 }
