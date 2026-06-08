@@ -1,9 +1,10 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect } from "react";
+import React, { createContext, useContext, useState, useEffect, useCallback, useMemo, useRef } from "react";
 import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { CheckCircle2, ShoppingBag } from "lucide-react";
+import type { Product } from "@/lib/types/product";
 
 export type CartItem = {
   id: string;
@@ -21,7 +22,7 @@ type CartToastData = {
 
 type CartContextType = {
   cart: CartItem[];
-  addToCart: (product: any) => void;
+  addToCart: (product: Product, quantity?: number) => void;
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, delta: number) => void;
   clearCart: () => void;
@@ -42,116 +43,160 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   const [toast, setToast] = useState<string | null>(null);
   const [cartToast, setCartToast] = useState<CartToastData>(null);
   const [isAnimating, setIsAnimating] = useState(false);
+  const [isHydrated, setIsHydrated] = useState(false);
+  const toastTimer = useRef<ReturnType<typeof setTimeout>>();
+  const cartToastTimer = useRef<ReturnType<typeof setTimeout>>();
+  const animTimer = useRef<ReturnType<typeof setTimeout>>();
 
-  // Plain text toast (kept for any other use)
-  const showToast = (msg: string) => {
+  const showToast = useCallback((msg: string) => {
+    if (toastTimer.current) clearTimeout(toastTimer.current);
     setToast(msg);
-    setTimeout(() => setToast(null), 3000);
-  };
+    toastTimer.current = setTimeout(() => setToast(null), 3000);
+  }, []);
 
-  // Rich product toast
-  const showCartToast = (product: { name: string; image: string; price: number }) => {
+  const showCartToast = useCallback((product: { name: string; image: string; price: number }) => {
+    if (cartToastTimer.current) clearTimeout(cartToastTimer.current);
     setCartToast(product);
-    setTimeout(() => setCartToast(null), 3500);
-  };
+    cartToastTimer.current = setTimeout(() => setCartToast(null), 3500);
+  }, []);
 
-  // Load cart from localStorage
   useEffect(() => {
     const savedCart = localStorage.getItem("scentiva_cart");
     if (savedCart) {
       try {
         setCart(JSON.parse(savedCart));
-      } catch (e) {
-        console.error("Failed to parse cart", e);
+      } catch {
+        localStorage.removeItem("scentiva_cart");
       }
     }
+    setIsHydrated(true);
+
+    return () => {
+      if (toastTimer.current) clearTimeout(toastTimer.current);
+      if (cartToastTimer.current) clearTimeout(cartToastTimer.current);
+      if (animTimer.current) clearTimeout(animTimer.current);
+    };
   }, []);
 
-  // Save cart to localStorage
   useEffect(() => {
+    if (!isHydrated) return;
     localStorage.setItem("scentiva_cart", JSON.stringify(cart));
-  }, [cart]);
+  }, [cart, isHydrated]);
 
-  const addToCart = (product: any) => {
+  const addToCart = useCallback((product: Product, quantity = 1) => {
+    if (animTimer.current) clearTimeout(animTimer.current);
     setIsAnimating(true);
-    setTimeout(() => setIsAnimating(false), 2000);
+    animTimer.current = setTimeout(() => setIsAnimating(false), 2000);
 
     setCart((prev) => {
       const existing = prev.find((item) => item.id === product.id);
       if (existing) {
         return prev.map((item) =>
           item.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
+            ? { ...item, quantity: item.quantity + quantity }
             : item
         );
       }
-      return [...prev, { 
-        id: product.id, 
-        name: product.name, 
-        price: product.actual, 
-        image: product.image, 
-        quantity: 1 
-      }];
+      return [
+        ...prev,
+        {
+          id: product.id,
+          name: product.name,
+          price: product.actual,
+          image: product.image,
+          quantity,
+        },
+      ];
     });
-  };
+  }, []);
 
-  const removeFromCart = (productId: string) => {
+  const removeFromCart = useCallback((productId: string) => {
     setCart((prev) => prev.filter((item) => item.id !== productId));
-  };
+  }, []);
 
-  const updateQuantity = (productId: string, delta: number) => {
+  const updateQuantity = useCallback((productId: string, delta: number) => {
     setCart((prev) =>
       prev.map((item) => {
         if (item.id === productId) {
-          const newQty = Math.max(1, item.quantity + delta);
-          return { ...item, quantity: newQty };
+          return { ...item, quantity: Math.max(1, item.quantity + delta) };
         }
         return item;
       })
     );
-  };
+  }, []);
 
-  const clearCart = () => setCart([]);
+  const clearCart = useCallback(() => setCart([]), []);
 
-  const totalItems = cart.reduce((acc, item) => acc + item.quantity, 0);
-  const totalPrice = cart.reduce((acc, item) => acc + item.price * item.quantity, 0);
+  const totalItems = useMemo(
+    () => cart.reduce((acc, item) => acc + item.quantity, 0),
+    [cart]
+  );
+  const totalPrice = useMemo(
+    () => cart.reduce((acc, item) => acc + item.price * item.quantity, 0),
+    [cart]
+  );
+
+  const value = useMemo(
+    () => ({
+      cart,
+      addToCart,
+      removeFromCart,
+      updateQuantity,
+      clearCart,
+      isCartOpen,
+      setIsCartOpen,
+      toast,
+      showToast,
+      showCartToast,
+      totalItems,
+      totalPrice,
+    }),
+    [
+      cart,
+      addToCart,
+      removeFromCart,
+      updateQuantity,
+      clearCart,
+      isCartOpen,
+      toast,
+      showToast,
+      showCartToast,
+      totalItems,
+      totalPrice,
+    ]
+  );
 
   return (
-    <CartContext.Provider value={{ 
-      cart, addToCart, removeFromCart, updateQuantity, clearCart, 
-      isCartOpen, setIsCartOpen, toast, showToast, showCartToast, totalItems, totalPrice 
-    }}>
+    <CartContext.Provider value={value}>
       {children}
 
-      {/* Flying Item Animation */}
       <AnimatePresence>
         {isAnimating && (
           <motion.div
-            initial={{ 
-              opacity: 1, 
-              scale: 2, 
-              x: "50vw", 
+            initial={{
+              opacity: 1,
+              scale: 2,
+              x: "50vw",
               y: "50vh",
               left: -12,
-              top: -12
+              top: -12,
             }}
-            animate={{ 
+            animate={{
               opacity: [1, 1, 0.8, 0],
               scale: [2, 1.2, 0.6, 0.1],
-              x: ["50vw", "75vw", "calc(100vw - 80px)"], 
+              x: ["50vw", "75vw", "calc(100vw - 80px)"],
               y: ["50vh", "25vh", "30px"],
             }}
-            transition={{ 
-              duration: 1.8, 
+            transition={{
+              duration: 1.8,
               times: [0, 0.4, 0.8, 1],
-              ease: [0.16, 1, 0.3, 1] 
+              ease: [0.16, 1, 0.3, 1],
             }}
             className="fixed pointer-events-none z-[500] w-6 h-6 bg-gold-oud rounded-full shadow-[0_0_35px_rgba(212,175,55,1),0_0_10px_rgba(255,255,255,0.5)] border border-parchment/20"
           />
         )}
       </AnimatePresence>
 
-      {/* ── Rich Cart Toast (product added) ── */}
       <AnimatePresence>
         {cartToast && (
           <motion.div
@@ -163,20 +208,10 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
             className="fixed bottom-6 left-4 right-4 md:left-auto md:right-6 md:w-80 z-[400] pointer-events-none"
           >
             <div className="relative bg-elevated border border-parchment/15 rounded-2xl p-3.5 shadow-[0_8px_40px_rgba(0,0,0,0.6)] overflow-hidden flex items-center gap-3.5">
-              {/* Gold shimmer bar at top */}
               <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-gold-oud to-transparent" />
-
-              {/* Product thumbnail */}
               <div className="relative w-14 h-14 rounded-xl overflow-hidden flex-shrink-0 border border-parchment/10">
-                <Image
-                  src={cartToast.image}
-                  alt={cartToast.name}
-                  fill
-                  className="object-cover"
-                />
+                <Image src={cartToast.image} alt={cartToast.name} fill className="object-cover" />
               </div>
-
-              {/* Text */}
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-1.5 mb-0.5">
                   <ShoppingBag size={11} className="text-emerald-400 flex-shrink-0" />
@@ -184,15 +219,9 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
                     Added to Bag
                   </p>
                 </div>
-                <p className="text-sm font-serif text-parchment leading-snug truncate">
-                  {cartToast.name}
-                </p>
-                <p className="text-xs text-gold-oud font-bold mt-0.5">
-                  GH₵ {cartToast.price}
-                </p>
+                <p className="text-sm font-serif text-parchment leading-snug truncate">{cartToast.name}</p>
+                <p className="text-xs text-gold-oud font-bold mt-0.5">GH₵ {cartToast.price}</p>
               </div>
-
-              {/* Animated check */}
               <motion.div
                 initial={{ scale: 0, rotate: -30 }}
                 animate={{ scale: 1, rotate: 0 }}
@@ -201,8 +230,6 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
               >
                 <CheckCircle2 size={26} className="text-emerald-400" />
               </motion.div>
-
-              {/* Auto-dismiss progress bar */}
               <motion.div
                 initial={{ scaleX: 1 }}
                 animate={{ scaleX: 0 }}
@@ -214,7 +241,6 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
         )}
       </AnimatePresence>
 
-      {/* Plain text toast (kept for backward compatibility) */}
       <AnimatePresence>
         {toast && (
           <motion.div

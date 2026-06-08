@@ -10,6 +10,7 @@ export declare class ProductsService implements OnModuleInit {
     create(createProductDto: CreateProductDto): Promise<Product>;
     findAll(): Promise<Product[]>;
     findOne(id: string): Promise<Product>;
+    findByIds(ids: string[]): Promise<Product[]>;
     update(id: string, updateProductDto: UpdateProductDto): Promise<Product>;
     remove(id: string): Promise<void>;
 }

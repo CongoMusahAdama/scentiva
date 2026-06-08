@@ -1,3 +1,8 @@
+declare class WhenToApplyDto {
+    icon: string;
+    label: string;
+    detail: string;
+}
 export declare class CreateProductDto {
     id: string;
     name: string;
@@ -11,13 +16,10 @@ export declare class CreateProductDto {
     desc: string;
     pros: string[];
     cons: string[];
-    whenToApply: {
-        icon: string;
-        label: string;
-        detail: string;
-    }[];
+    whenToApply: WhenToApplyDto[];
     perfectOccasion: string;
     status: string;
 }
 export declare class UpdateProductDto extends CreateProductDto {
 }
+export {};

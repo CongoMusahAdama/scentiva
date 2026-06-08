@@ -18,6 +18,8 @@ const platform_express_1 = require("@nestjs/platform-express");
 const users_service_1 = require("./users.service");
 const cloudinary_service_1 = require("../cloudinary/cloudinary.service");
 const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
+const update_profile_dto_1 = require("./dto/update-profile.dto");
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 let UsersController = class UsersController {
     constructor(usersService, cloudinaryService) {
         this.usersService = usersService;
@@ -26,12 +28,14 @@ let UsersController = class UsersController {
     async updateProfile(req, updateData) {
         if (!req.user)
             throw new common_1.BadRequestException('User not authenticated');
-        const { phone, role, ...safeData } = updateData;
-        return this.usersService.update(req.user.userId, safeData);
+        return this.usersService.updateProfile(req.user.userId, updateData);
     }
     async uploadProfileImage(req, file) {
         if (!file)
             throw new common_1.BadRequestException('No file uploaded');
+        if (file.size > MAX_IMAGE_SIZE) {
+            throw new common_1.BadRequestException('Image must be under 5MB');
+        }
         const result = await this.cloudinaryService.uploadImage(file);
         const updatedUser = await this.usersService.updateProfileImage(req.user.userId, result.secure_url);
         if (!updatedUser) {
@@ -53,7 +57,7 @@ __decorate([
     __param(0, (0, common_1.Request)()),
     __param(1, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object, Object]),
+    __metadata("design:paramtypes", [Object, update_profile_dto_1.UpdateProfileDto]),
     __metadata("design:returntype", Promise)
 ], UsersController.prototype, "updateProfile", null);
 __decorate([

@@ -8,5 +8,13 @@ export declare class CreateOrderDto {
     phone: string;
     address: string;
 }
-export declare class UpdateOrderDto extends CreateOrderDto {
+export declare class UpdateOrderDto {
+    id?: string;
+    customer?: string;
+    products?: string;
+    amount?: string;
+    status?: string;
+    date?: string;
+    phone?: string;
+    address?: string;
 }

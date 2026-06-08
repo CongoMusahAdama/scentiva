@@ -1,24 +1,21 @@
-const API_URL = `${process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:3001'}/settings`;
+import { API_URL, getAuthHeaders } from "@/lib/api";
 
-const getHeaders = () => ({
-  "Content-Type": "application/json",
-  "Authorization": `Bearer ${localStorage.getItem("adminToken")}`
-});
+const SETTINGS_URL = `${API_URL}/settings`;
 
 export const SettingService = {
   async getSettings() {
-    const res = await fetch(API_URL, { headers: getHeaders() });
+    const res = await fetch(SETTINGS_URL);
     if (!res.ok) throw new Error("Failed to fetch settings");
     return res.json();
   },
 
-  async updateSettings(data: any) {
-    const res = await fetch(API_URL, {
+  async updateSettings(data: Record<string, unknown>) {
+    const res = await fetch(SETTINGS_URL, {
       method: "POST",
-      headers: getHeaders(),
-      body: JSON.stringify(data)
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data),
     });
     if (!res.ok) throw new Error("Failed to update settings");
     return res.json();
-  }
+  },
 };

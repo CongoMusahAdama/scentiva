@@ -15,6 +15,9 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { UsersService } from './users.service';
 import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { UpdateProfileDto } from './dto/update-profile.dto';
+
+const MAX_IMAGE_SIZE = 5 * 1024 * 1024;
 
 @Controller('users')
 export class UsersController {
@@ -25,13 +28,9 @@ export class UsersController {
 
   @UseGuards(JwtAuthGuard)
   @Patch('profile')
-  async updateProfile(@Request() req, @Body() updateData: any) {
+  async updateProfile(@Request() req, @Body() updateData: UpdateProfileDto) {
     if (!req.user) throw new BadRequestException('User not authenticated');
-    
-    // Prevent updating sensitive fields
-    const { phone, role, ...safeData } = updateData;
-    
-    return this.usersService.update(req.user.userId, safeData);
+    return this.usersService.updateProfile(req.user.userId, updateData);
   }
 
   @UseGuards(JwtAuthGuard)
@@ -39,7 +38,10 @@ export class UsersController {
   @UseInterceptors(FileInterceptor('file'))
   async uploadProfileImage(@Request() req, @UploadedFile() file: Express.Multer.File) {
     if (!file) throw new BadRequestException('No file uploaded');
-    
+    if (file.size > MAX_IMAGE_SIZE) {
+      throw new BadRequestException('Image must be under 5MB');
+    }
+
     const result = await this.cloudinaryService.uploadImage(file);
     const updatedUser = await this.usersService.updateProfileImage(req.user.userId, result.secure_url);
     if (!updatedUser) {

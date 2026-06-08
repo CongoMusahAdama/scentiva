@@ -9,7 +9,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     super({
       jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
       ignoreExpiration: false,
-      secretOrKey: configService.get<string>('JWT_SECRET') || 'scentiva_ultra_secure_secret_key_2024',
+      secretOrKey: configService.getOrThrow<string>('JWT_SECRET'),
     });
   }
 

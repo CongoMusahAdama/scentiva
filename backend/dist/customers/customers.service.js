@@ -31,7 +31,7 @@ let CustomersService = class CustomersService {
     async delete(id) {
         const customer = await this.customerModel.findByIdAndDelete(id).exec();
         if (!customer) {
-            throw new Error("Customer not found");
+            throw new common_1.NotFoundException('Customer not found');
         }
         return customer;
     }

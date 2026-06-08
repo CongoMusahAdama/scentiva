@@ -1,5 +1,5 @@
 import { allProducts } from "@/lib/products";
-import type { Product } from "@/components/ProductModal";
+import type { Product } from "@/lib/types/product";
 
 export function getProductById(id: string): Product | undefined {
   const decoded = decodeURIComponent(id);

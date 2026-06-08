@@ -1,9 +1,18 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+  ReactNode,
+} from "react";
 import { useRouter } from "next/navigation";
 import Cookies from "js-cookie";
 import { showSuccess, showError } from "@/lib/swal";
+import { API_URL } from "@/lib/api";
 
 interface User {
   id: string;
@@ -19,7 +28,7 @@ interface AuthContextType {
   token: string | null;
   isLoading: boolean;
   login: (phone: string, password: string, returnTo?: string) => Promise<void>;
-  signup: (userData: any) => Promise<void>;
+  signup: (userData: Record<string, unknown>) => Promise<void>;
   verifyOtp: (phone: string, otp: string, returnTo?: string) => Promise<void>;
   resendOtp: (phone: string) => Promise<void>;
   logout: () => void;
@@ -31,42 +40,53 @@ const AuthContext = createContext<AuthContextType | null>(null);
 const safeReturnTo = (path?: string | null) =>
   path && path.startsWith("/") && !path.startsWith("//") ? path : null;
 
+function persistAuthSession(accessToken: string, authUser: User) {
+  Cookies.set("scentiva_token", accessToken, { expires: 7, sameSite: "lax" });
+  Cookies.set("scentiva_user", JSON.stringify(authUser), { expires: 7, sameSite: "lax" });
+  if (authUser.role?.toUpperCase() === "ADMIN") {
+    localStorage.setItem("adminToken", accessToken);
+  }
+}
+
+function redirectAfterAuth(router: ReturnType<typeof useRouter>, user: User, returnTo?: string) {
+  if (user.role?.toUpperCase() === "ADMIN") {
+    router.push("/admin");
+    return;
+  }
+  router.push(safeReturnTo(returnTo) || "/dashboard");
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const router = useRouter();
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:3001";
-
   useEffect(() => {
-    // Try to load from cookies first (better for SSR/Middleware)
     const savedToken = Cookies.get("scentiva_token");
     const savedUser = Cookies.get("scentiva_user");
 
     if (savedToken && savedUser) {
-      setToken(savedToken);
-      setUser(JSON.parse(savedUser));
+      try {
+        setToken(savedToken);
+        setUser(JSON.parse(savedUser));
+      } catch {
+        Cookies.remove("scentiva_token");
+        Cookies.remove("scentiva_user");
+      }
     }
     setIsLoading(false);
   }, []);
 
-  const login = async (phone: string, password: string, returnTo?: string) => {
-    console.log(`[AUTH] Attempting login for: ${phone} at ${API_URL}`);
+  const login = useCallback(async (phone: string, password: string, returnTo?: string) => {
     try {
       const response = await fetch(`${API_URL}/auth/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ phone, password }),
       });
-      console.log(`[AUTH] Response received: ${response.status} ${response.statusText}`);
 
-      const contentType = response.headers.get("content-type");
-      let data;
-      if (contentType && contentType.includes("application/json")) {
-        data = await response.json();
-        console.log(`[AUTH] Response data:`, data);
-      }
+      const data = response.ok ? await response.json() : null;
 
       if (!response.ok) {
         if (response.status === 401) {
@@ -75,38 +95,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         throw new Error(data?.message || "An unexpected error occurred during login.");
       }
 
-      if (data.requiresVerification) {
-        if (data.otp) console.log(`[TEST] Verification Code: ${data.otp}`);
-        const otpUrl = new URLSearchParams({ phone: data.phone });
-        const redirect = safeReturnTo(returnTo);
-        if (redirect) otpUrl.set("returnTo", redirect);
-        router.push(`/verify-otp?${otpUrl.toString()}`);
-        return;
-      }
-
       setToken(data.access_token);
       setUser(data.user);
-
-      // Save to cookies for Middleware access
-      Cookies.set("scentiva_token", data.access_token, { expires: 7 });
-      Cookies.set("scentiva_user", JSON.stringify(data.user), { expires: 7 });
+      persistAuthSession(data.access_token, data.user);
 
       if (data.user.role?.toUpperCase() === "ADMIN") {
-        localStorage.setItem("adminToken", data.access_token);
         showSuccess("Welcome Admin", "Successfully logged into the dashboard");
-        router.push("/admin");
       } else {
         showSuccess("Welcome Back", "Successfully logged in");
-        router.push(safeReturnTo(returnTo) || "/dashboard");
       }
-    } catch (error: any) {
-      console.error("Login error:", error);
-      showError("Login Failed", error.message || "Invalid credentials");
+      redirectAfterAuth(router, data.user, returnTo);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Invalid credentials";
+      showError("Login Failed", message);
       throw error;
     }
-  };
+  }, [router]);
 
-  const signup = async (userData: any) => {
+  const signup = useCallback(async (userData: Record<string, unknown>) => {
     try {
       const response = await fetch(`${API_URL}/auth/register`, {
         method: "POST",
@@ -114,28 +120,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify(userData),
       });
 
-      const contentType = response.headers.get("content-type");
-      let data;
-      if (contentType && contentType.includes("application/json")) {
-        data = await response.json();
-      }
-
+      const data = response.ok ? await response.json() : null;
       if (!response.ok) {
         throw new Error(data?.message || "Registration failed. Please try again.");
       }
 
-      if (data.otp) console.log(`[TEST] Verification Code: ${data.otp}`);
-      const otpUrl = new URLSearchParams({ phone: userData.phone });
-      const redirect = safeReturnTo(userData.returnTo);
-      if (redirect) otpUrl.set("returnTo", redirect);
-      router.push(`/verify-otp?${otpUrl.toString()}`);
-    } catch (error) {
-      console.error("Signup error:", error);
+      setToken(data.access_token);
+      setUser(data.user);
+      persistAuthSession(data.access_token, data.user);
+
+      showSuccess("Welcome", "Your account is ready.");
+      redirectAfterAuth(router, data.user, userData.returnTo as string | undefined);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Registration failed";
+      showError("Signup Failed", message);
       throw error;
     }
-  };
+  }, [router]);
 
-  const verifyOtp = async (phone: string, otp: string, returnTo?: string) => {
+  const verifyOtp = useCallback(async (phone: string, otp: string, returnTo?: string) => {
     try {
       const response = await fetch(`${API_URL}/auth/verify-otp`, {
         method: "POST",
@@ -143,79 +146,71 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         body: JSON.stringify({ phone, otp }),
       });
 
-      const contentType = response.headers.get("content-type");
-      let data;
-      if (contentType && contentType.includes("application/json")) {
-        data = await response.json();
-      }
-
+      const data = response.ok ? await response.json() : null;
       if (!response.ok) {
         throw new Error(data?.message || "Verification failed. Please try again.");
       }
 
       setToken(data.access_token);
       setUser(data.user);
-
-      // Save to cookies for Middleware access
-      Cookies.set("scentiva_token", data.access_token, { expires: 7 });
-      Cookies.set("scentiva_user", JSON.stringify(data.user), { expires: 7 });
-
-      if (data.user.role?.toUpperCase() === "ADMIN") {
-        localStorage.setItem("adminToken", data.access_token);
-        router.push("/admin");
-      } else {
-        router.push(safeReturnTo(returnTo) || "/dashboard");
-      }
-    } catch (error) {
-      console.error("Verification error:", error);
+      persistAuthSession(data.access_token, data.user);
+      redirectAfterAuth(router, data.user, returnTo);
+    } catch (error: unknown) {
+      const message = error instanceof Error ? error.message : "Verification failed";
+      showError("Verification Failed", message);
       throw error;
     }
-  };
+  }, [router]);
 
-  const resendOtp = async (phone: string) => {
-    try {
-      const response = await fetch(`${API_URL}/auth/resend-otp`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ phone }),
-      });
+  const resendOtp = useCallback(async (phone: string) => {
+    const response = await fetch(`${API_URL}/auth/resend-otp`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ phone }),
+    });
 
-      const data = await response.json();
-      if (!response.ok) {
-        throw new Error(data.message || "Failed to resend OTP");
-      }
-      if (data.otp) console.log(`[TEST] Resent Verification Code: ${data.otp}`);
-    } catch (error) {
-      console.error("Resend error:", error);
-      throw error;
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || "Failed to resend OTP");
     }
-  };
+  }, []);
 
-  const logout = () => {
+  const logout = useCallback(() => {
     setToken(null);
     setUser(null);
     Cookies.remove("scentiva_token");
     Cookies.remove("scentiva_user");
-    
+    localStorage.removeItem("adminToken");
+
     showSuccess("Signed Out", "You have been successfully signed out.");
-    setTimeout(() => {
-      router.push("/");
-    }, 2000);
-  };
+    setTimeout(() => router.push("/"), 1500);
+  }, [router]);
 
-  const updateUser = (userData: Partial<User>) => {
-    if (user) {
-      const newUser = { ...user, ...userData };
-      setUser(newUser);
-      Cookies.set("scentiva_user", JSON.stringify(newUser), { expires: 7 });
-    }
-  };
+  const updateUser = useCallback((userData: Partial<User>) => {
+    setUser((prev) => {
+      if (!prev) return prev;
+      const next = { ...prev, ...userData };
+      Cookies.set("scentiva_user", JSON.stringify(next), { expires: 7, sameSite: "lax" });
+      return next;
+    });
+  }, []);
 
-  return (
-    <AuthContext.Provider value={{ user, token, isLoading, login, signup, verifyOtp, resendOtp, logout, updateUser }}>
-      {children}
-    </AuthContext.Provider>
+  const value = useMemo(
+    () => ({
+      user,
+      token,
+      isLoading,
+      login,
+      signup,
+      verifyOtp,
+      resendOtp,
+      logout,
+      updateUser,
+    }),
+    [user, token, isLoading, login, signup, verifyOtp, resendOtp, logout, updateUser]
   );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }
 
 export function useAuth() {

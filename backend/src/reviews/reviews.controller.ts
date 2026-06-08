@@ -1,6 +1,10 @@
-import { Controller, Get, Post, Body, Param, Patch, Delete, Query } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Patch, Delete, Query, UseGuards } from '@nestjs/common';
 import { ReviewsService } from './reviews.service';
 import { ReviewDto } from './dto/review.dto';
+import { JwtAuthGuard } from '../auth/guards/jwt-auth.guard';
+import { RolesGuard } from '../auth/guards/roles.guard';
+import { Roles } from '../auth/decorators/roles.decorator';
+import { UserRole } from '../users/schemas/user.schema';
 
 @Controller('reviews')
 export class ReviewsController {
@@ -14,11 +18,14 @@ export class ReviewsController {
     return this.reviewsService.findAll();
   }
 
+  @UseGuards(JwtAuthGuard)
   @Post()
   async create(@Body() reviewDto: ReviewDto) {
     return this.reviewsService.create(reviewDto);
   }
 
+  @Roles(UserRole.ADMIN)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Patch(':id/status')
   async updateStatus(
     @Param('id') id: string,
@@ -27,6 +34,8 @@ export class ReviewsController {
     return this.reviewsService.updateStatus(id, status);
   }
 
+  @Roles(UserRole.ADMIN)
+  @UseGuards(JwtAuthGuard, RolesGuard)
   @Delete(':id')
   async delete(@Param('id') id: string) {
     return this.reviewsService.delete(id);

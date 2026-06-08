@@ -1,33 +1,30 @@
-const API_URL = `${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3001'}/customers`;
+import { API_URL, getAuthHeaders } from "@/lib/api";
 
-const getHeaders = () => ({
-  "Content-Type": "application/json",
-  "Authorization": `Bearer ${localStorage.getItem("adminToken")}`
-});
+const CUSTOMERS_URL = `${API_URL}/customers`;
 
 export const CustomerService = {
   async getAll() {
-    const res = await fetch(API_URL, { headers: getHeaders() });
+    const res = await fetch(CUSTOMERS_URL, { headers: getAuthHeaders(false) });
     if (!res.ok) throw new Error("Failed to fetch customers");
     return res.json();
   },
 
-  async create(data: any) {
-    const res = await fetch(API_URL, {
+  async create(data: Record<string, unknown>) {
+    const res = await fetch(CUSTOMERS_URL, {
       method: "POST",
-      headers: getHeaders(),
-      body: JSON.stringify(data)
+      headers: getAuthHeaders(),
+      body: JSON.stringify(data),
     });
     if (!res.ok) throw new Error("Failed to create customer");
     return res.json();
   },
 
   async delete(id: string) {
-    const res = await fetch(`${API_URL}/${id}`, {
+    const res = await fetch(`${CUSTOMERS_URL}/${id}`, {
       method: "DELETE",
-      headers: getHeaders()
+      headers: getAuthHeaders(false),
     });
     if (!res.ok) throw new Error("Failed to delete customer");
     return res.json();
-  }
+  },
 };

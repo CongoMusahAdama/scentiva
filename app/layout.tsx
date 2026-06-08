@@ -34,11 +34,11 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className={`${lora.variable} ${poppins.variable} antialiased light`} suppressHydrationWarning>
+    <html lang="en" className={`${lora.variable} ${poppins.variable} antialiased dark`} suppressHydrationWarning>
       <head>
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){try{var t=localStorage.getItem('scentiva-theme');var r=document.documentElement;r.classList.remove('light','dark');r.classList.add(t==='dark'?'dark':'light');r.style.colorScheme=t==='dark'?'dark':'light';}catch(e){}})();`,
+            __html: `(function(){try{var t=localStorage.getItem('scentiva-theme');var theme=(t==='dark'||t==='light')?t:'dark';var r=document.documentElement;r.classList.remove('light','dark');r.classList.add(theme);r.style.colorScheme=theme;}catch(e){}})();`,
           }}
         />
       </head>

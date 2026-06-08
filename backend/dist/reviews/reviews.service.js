@@ -34,14 +34,14 @@ let ReviewsService = class ReviewsService {
     async updateStatus(id, status) {
         const review = await this.reviewModel.findByIdAndUpdate(id, { status }, { new: true }).exec();
         if (!review) {
-            throw new Error("Review not found");
+            throw new common_1.NotFoundException('Review not found');
         }
         return review;
     }
     async delete(id) {
         const review = await this.reviewModel.findByIdAndDelete(id).exec();
         if (!review) {
-            throw new Error("Review not found");
+            throw new common_1.NotFoundException('Review not found');
         }
         return review;
     }

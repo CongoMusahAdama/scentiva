@@ -17,6 +17,8 @@ const common_1 = require("@nestjs/common");
 const auth_service_1 = require("./auth.service");
 const register_dto_1 = require("./dto/register.dto");
 const login_dto_1 = require("./dto/login.dto");
+const verify_otp_dto_1 = require("./dto/verify-otp.dto");
+const resend_otp_dto_1 = require("./dto/resend-otp.dto");
 const jwt_auth_guard_1 = require("./guards/jwt-auth.guard");
 let AuthController = class AuthController {
     constructor(authService) {
@@ -57,14 +59,14 @@ __decorate([
     (0, common_1.Post)('verify-otp'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [verify_otp_dto_1.VerifyOtpDto]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "verifyOtp", null);
 __decorate([
     (0, common_1.Post)('resend-otp'),
     __param(0, (0, common_1.Body)()),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [Object]),
+    __metadata("design:paramtypes", [resend_otp_dto_1.ResendOtpDto]),
     __metadata("design:returntype", Promise)
 ], AuthController.prototype, "resendOtp", null);
 __decorate([

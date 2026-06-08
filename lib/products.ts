@@ -1,4 +1,4 @@
-import type { Product } from "@/components/ProductModal";
+import type { Product } from "@/lib/types/product";
 
 export const allProducts: Product[] = [
   {

@@ -43,4 +43,5 @@ exports.SmsLog = SmsLog = __decorate([
     (0, mongoose_1.Schema)({ timestamps: true })
 ], SmsLog);
 exports.SmsLogSchema = mongoose_1.SchemaFactory.createForClass(SmsLog);
+exports.SmsLogSchema.index({ recipient: 1, eventType: 1, referenceId: 1, status: 1 });
 //# sourceMappingURL=sms-log.schema.js.map

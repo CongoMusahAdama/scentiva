@@ -152,7 +152,7 @@ function SignupContent() {
               </div>
 
               <div className="space-y-1">
-                <label className="text-[10px] font-bold text-[#1A1B23]/40 uppercase tracking-[0.2em] ml-1">Email (For OTP Verification)</label>
+                <label className="text-[10px] font-bold text-[#1A1B23]/40 uppercase tracking-[0.2em] ml-1">Email</label>
                 <div className="relative">
                   <Mail className="absolute left-0 top-1/2 -translate-y-1/2 text-[#D8B34B]" size={16} />
                   <input 

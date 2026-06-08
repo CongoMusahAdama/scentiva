@@ -6,7 +6,7 @@ import { motion, AnimatePresence } from "framer-motion";
 
 export default function ChatWidget() {
   const [open, setOpen] = useState(false);
-  const whatsapp = "233506626068";
+  const whatsapp = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "233506626068";
   const phone = "0506626068";
 
   return (

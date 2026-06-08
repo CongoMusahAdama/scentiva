@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Review } from './schemas/review.schema';
@@ -24,7 +24,7 @@ export class ReviewsService {
   async updateStatus(id: string, status: 'pending' | 'approved' | 'rejected'): Promise<Review> {
     const review = await this.reviewModel.findByIdAndUpdate(id, { status }, { new: true }).exec();
     if (!review) {
-      throw new Error("Review not found");
+      throw new NotFoundException('Review not found');
     }
     return review;
   }
@@ -32,7 +32,7 @@ export class ReviewsService {
   async delete(id: string): Promise<Review> {
     const review = await this.reviewModel.findByIdAndDelete(id).exec();
     if (!review) {
-      throw new Error("Review not found");
+      throw new NotFoundException('Review not found');
     }
     return review;
   }

@@ -54,6 +54,11 @@ let ProductsService = class ProductsService {
         }
         return product;
     }
+    async findByIds(ids) {
+        if (!ids.length)
+            return [];
+        return this.productModel.find({ id: { $in: ids } }).exec();
+    }
     async update(id, updateProductDto) {
         const updatedProduct = await this.productModel
             .findOneAndUpdate({ id }, updateProductDto, { new: true })

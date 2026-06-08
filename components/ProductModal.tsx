@@ -11,28 +11,11 @@ import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import { WishlistService } from "@/lib/services/wishlist.service";
 import { showSuccess, showError } from "@/lib/swal";
+import type { Product } from "@/lib/types/product";
+import { productIconMap } from "@/lib/product-icons";
+import { WHATSAPP_NUMBER } from "@/lib/delivery";
 
-const iconMap: Record<string, React.ElementType> = {
-  Moon, Heart, Landmark, Sun, GraduationCap, Briefcase, 
-  Sunrise, Dumbbell, Backpack, Scissors, PartyPopper, ShoppingBag, Gift
-};
-
-export type Product = {
-  id: string;
-  name: string;
-  actual: number;
-  original: number;
-  tag: string;
-  category: string;
-  image: string;
-  desc: string;
-  pros: string[];
-  cons: string[];
-  whenToApply: { icon: string; label: string; detail: string }[];
-  perfectOccasion: string;
-  status?: "in-stock" | "sold-out";
-  image2?: string;
-};
+export type { Product };
 
 type Props = {
   product: Product | null;
@@ -275,7 +258,7 @@ const ProductModal = ({ product, onClose }: Props) => {
                 </h3>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
                   {product.whenToApply.map((w, i) => {
-                    const IconComp = iconMap[w.icon] || Clock;
+                    const IconComp = productIconMap[w.icon] || Clock;
                     return (
                       <div key={i} className="bg-parchment/5 border border-parchment/8 rounded-lg p-2.5 text-center flex flex-col items-center">
                         <div className="text-gold-oud mb-1.5">
@@ -298,7 +281,7 @@ const ProductModal = ({ product, onClose }: Props) => {
                     Restocking soon. Secure yours without payment today.
                   </p>
                   <a 
-                    href={`https://wa.me/233506626068?text=${encodeURIComponent(
+                    href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
                       `Hello Scentiva, I am ${user?.fullName || "a customer"} and I would like to PRE-ORDER: ${product.name} (SKU: ${product.id}). Please notify me when it's back in stock!`
                     )}`}
                     target="_blank"
@@ -312,7 +295,7 @@ const ProductModal = ({ product, onClose }: Props) => {
               ) : (
                 <>
                   <a 
-                    href={`https://wa.me/233506626068?text=${encodeURIComponent(
+                    href={`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(
                       `Hello Scentiva, I am ${user?.fullName || "a customer"} and I would like to order: ${product.name} (SKU: ${product.id})`
                     )}`}
                     target="_blank"

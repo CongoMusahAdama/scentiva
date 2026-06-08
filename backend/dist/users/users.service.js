@@ -11,39 +11,54 @@ var __metadata = (this && this.__metadata) || function (k, v) {
 var __param = (this && this.__param) || function (paramIndex, decorator) {
     return function (target, key) { decorator(target, key, paramIndex); }
 };
+var UsersService_1;
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.UsersService = exports.ADMIN_CREDENTIALS = void 0;
+exports.UsersService = void 0;
 const common_1 = require("@nestjs/common");
 const mongoose_1 = require("@nestjs/mongoose");
 const mongoose_2 = require("mongoose");
-const user_schema_1 = require("./schemas/user.schema");
-exports.ADMIN_CREDENTIALS = {
-    email: 'amusahcongo@gmail.com',
-    phone: '0000000000',
-    password: 'Musah@scentivaadmin12345',
-};
 const config_1 = require("@nestjs/config");
 const bcrypt = require("bcrypt");
+const user_schema_1 = require("./schemas/user.schema");
 const products_service_1 = require("../products/products.service");
-let UsersService = class UsersService {
+const BCRYPT_ROUNDS = 10;
+let UsersService = UsersService_1 = class UsersService {
     constructor(userModel, configService, productsService) {
         this.userModel = userModel;
         this.configService = configService;
         this.productsService = productsService;
+        this.logger = new common_1.Logger(UsersService_1.name);
     }
     async onModuleInit() {
         await this.seedAdmin();
     }
+    sanitizeUser(user) {
+        if (!user)
+            return null;
+        const obj = user.toObject();
+        delete obj.password;
+        delete obj.otp;
+        delete obj.otpExpires;
+        return obj;
+    }
+    async deleteAllCustomers() {
+        const result = await this.userModel.deleteMany({ role: user_schema_1.UserRole.CUSTOMER }).exec();
+        return result.deletedCount;
+    }
     async seedAdmin() {
-        const adminEmail = 'amusahcongo@gmail.com';
-        const adminPhone = '0000000000';
-        const adminPassword = 'Musah@scentivaadmin12345';
+        const adminEmail = this.configService.get('ADMIN_EMAIL');
+        const adminPhone = this.configService.get('ADMIN_PHONE');
+        const adminPassword = this.configService.get('ADMIN_PASSWORD');
+        if (!adminEmail || !adminPhone || !adminPassword) {
+            this.logger.warn('Admin seed skipped — set ADMIN_EMAIL, ADMIN_PHONE, ADMIN_PASSWORD in env');
+            return;
+        }
         try {
             const existingAdmin = await this.userModel.findOne({
-                $or: [{ email: adminEmail }, { phone: adminPhone }]
+                $or: [{ email: adminEmail }, { phone: adminPhone }],
             });
             if (!existingAdmin) {
-                const hashedPassword = await bcrypt.hash(adminPassword, 10);
+                const hashedPassword = await bcrypt.hash(adminPassword, BCRYPT_ROUNDS);
                 await this.userModel.create({
                     phone: adminPhone,
                     email: adminEmail,
@@ -52,22 +67,20 @@ let UsersService = class UsersService {
                     role: user_schema_1.UserRole.ADMIN,
                     isVerified: true,
                 });
-                console.log('✅ Default admin user created');
+                this.logger.log('Default admin user created');
             }
-            else {
-                if (existingAdmin.role === user_schema_1.UserRole.ADMIN && !existingAdmin.isVerified) {
-                    existingAdmin.isVerified = true;
-                    await existingAdmin.save();
-                    console.log('✅ Default admin user verified');
-                }
+            else if (existingAdmin.role === user_schema_1.UserRole.ADMIN && !existingAdmin.isVerified) {
+                existingAdmin.isVerified = true;
+                await existingAdmin.save();
+                this.logger.log('Default admin user verified');
             }
         }
         catch (error) {
             if (error.code === 11000) {
-                console.warn('⚠️ Admin user already exists (duplicate key). skipping seed.');
+                this.logger.warn('Admin user already exists — skipping seed');
             }
             else {
-                console.error('❌ Error seeding admin user:', error);
+                this.logger.error('Error seeding admin user', error);
             }
         }
     }
@@ -81,15 +94,28 @@ let UsersService = class UsersService {
         return newUser.save();
     }
     async findById(id) {
-        return this.userModel.findById(id).exec();
+        return this.userModel.findById(id).select('-password -otp -otpExpires').exec();
     }
     async update(id, updateData) {
-        return this.userModel.findByIdAndUpdate(id, updateData, { new: true }).exec();
+        const user = await this.userModel
+            .findByIdAndUpdate(id, updateData, { new: true })
+            .select('-password -otp -otpExpires')
+            .exec();
+        return user;
+    }
+    async updateProfile(id, dto) {
+        const updateData = {};
+        if (dto.fullName)
+            updateData.fullName = dto.fullName;
+        if (dto.email)
+            updateData.email = dto.email;
+        if (dto.password) {
+            updateData.password = await bcrypt.hash(dto.password, BCRYPT_ROUNDS);
+        }
+        return this.update(id, updateData);
     }
     async updateProfileImage(id, profileImage) {
-        return this.userModel
-            .findByIdAndUpdate(id, { profileImage }, { new: true })
-            .exec();
+        return this.update(id, { profileImage });
     }
     async toggleWishlist(userId, productId) {
         const user = await this.userModel.findById(userId);
@@ -109,12 +135,13 @@ let UsersService = class UsersService {
         const user = await this.userModel.findById(userId);
         if (!user)
             throw new common_1.NotFoundException('User not found');
-        const products = await Promise.all(user.wishlist.map(id => this.productsService.findOne(id).catch(() => null)));
-        return products.filter(p => p !== null);
+        if (!user.wishlist.length)
+            return [];
+        return this.productsService.findByIds(user.wishlist);
     }
 };
 exports.UsersService = UsersService;
-exports.UsersService = UsersService = __decorate([
+exports.UsersService = UsersService = UsersService_1 = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, mongoose_1.InjectModel)(user_schema_1.User.name)),
     __metadata("design:paramtypes", [mongoose_2.Model,

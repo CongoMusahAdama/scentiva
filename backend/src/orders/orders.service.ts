@@ -1,4 +1,4 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { Order } from './schemas/order.schema';
@@ -9,6 +9,8 @@ import { SmsService } from '../sms/sms.service';
 
 @Injectable()
 export class OrdersService {
+  private readonly logger = new Logger(OrdersService.name);
+
   constructor(
     @InjectModel(Order.name) private orderModel: Model<Order>,
     private mailService: MailService,
@@ -20,29 +22,32 @@ export class OrdersService {
     const newOrder = new this.orderModel(createOrderDto);
     const savedOrder = await newOrder.save();
 
-    // Notify Customer
-    await this.smsService.sendSms(
-      savedOrder.phone,
-      `Your Scentiva Aura order #${savedOrder.id} has been received successfully.`,
-      'order_placed',
-      savedOrder.id
-    );
-
-    // Notify Admin
-    await this.smsService.sendAdminNotification(
-      `New order #${savedOrder.id} – GHS ${savedOrder.amount} – Customer: ${savedOrder.customer}`,
-      'admin_order_notification',
-      savedOrder.id
+    this.sendOrderNotifications(savedOrder).catch((err) =>
+      this.logger.error('Order notification error', err),
     );
 
     return savedOrder;
   }
 
-  async findAll(phone?: string): Promise<Order[]> {
-    if (phone) {
-      return this.orderModel.find({ phone }).exec();
-    }
-    return this.orderModel.find().exec();
+  private async sendOrderNotifications(order: Order) {
+    await this.smsService.sendSms(
+      order.phone,
+      `Your Scentiva Aura order #${order.id} has been received successfully.`,
+      'order_placed',
+      order.id,
+    );
+    await this.smsService.sendAdminNotification(
+      `New order #${order.id} – GHS ${order.amount} – Customer: ${order.customer}`,
+      'admin_order_notification',
+      order.id,
+    );
+  }
+
+  async findAll(phone?: string, page = 1, limit = 50): Promise<Order[]> {
+    const query = phone ? { phone } : {};
+    const safeLimit = Math.min(Math.max(limit, 1), 100);
+    const skip = (Math.max(page, 1) - 1) * safeLimit;
+    return this.orderModel.find(query).sort({ createdAt: -1 }).skip(skip).limit(safeLimit).exec();
   }
 
   async findOne(id: string): Promise<Order> {
@@ -99,13 +104,9 @@ export class OrdersService {
         await this.smsService.sendSms(order.phone, smsMessage, eventType, order.id);
       }
 
-      // Simulate WhatsApp Push (Log only as per existing logic)
-      console.log(`\n📱 PUSH NOTIFICATION (WHATSAPP):`);
-      console.log(`To: ${order.phone}`);
-      console.log(`Message: Hello ${order.customer}, your Scentiva order ${order.id} is now ${order.status.toUpperCase()}. Track here: https://wa.me/233506626068\n`);
-      
+      this.logger.log(`Order ${order.id} status updated to ${order.status} for ${order.phone}`);
     } catch (err) {
-      console.error('Notification Error:', err);
+      this.logger.error('Notification Error', err);
     }
   }
 

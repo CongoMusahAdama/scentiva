@@ -33,11 +33,11 @@ export class User extends Document {
   @Prop({ default: false })
   isVerified: boolean;
 
-  @Prop()
-  otp: string;
+  @Prop({ required: false })
+  otp?: string;
 
-  @Prop()
-  otpExpires: Date;
+  @Prop({ required: false })
+  otpExpires?: Date;
 
   @Prop({ type: [String], default: [] })
   wishlist: string[];

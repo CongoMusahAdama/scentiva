@@ -3,7 +3,7 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import type { Product } from "@/components/ProductModal";
+import type { Product } from "@/lib/types/product";
 import { getProductHref } from "@/lib/product-utils";
 
 type ProductCardProps = {

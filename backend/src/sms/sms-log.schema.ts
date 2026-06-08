@@ -23,3 +23,4 @@ export class SmsLog extends Document {
 }
 
 export const SmsLogSchema = SchemaFactory.createForClass(SmsLog);
+SmsLogSchema.index({ recipient: 1, eventType: 1, referenceId: 1, status: 1 });

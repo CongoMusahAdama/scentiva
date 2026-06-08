@@ -14,6 +14,7 @@ const orders_controller_1 = require("./orders.controller");
 const order_schema_1 = require("./schemas/order.schema");
 const mail_module_1 = require("../mail/mail.module");
 const users_module_1 = require("../users/users.module");
+const auth_module_1 = require("../auth/auth.module");
 let OrdersModule = class OrdersModule {
 };
 exports.OrdersModule = OrdersModule;
@@ -23,6 +24,7 @@ exports.OrdersModule = OrdersModule = __decorate([
             mongoose_1.MongooseModule.forFeature([{ name: order_schema_1.Order.name, schema: order_schema_1.OrderSchema }]),
             mail_module_1.MailModule,
             users_module_1.UsersModule,
+            auth_module_1.AuthModule,
         ],
         controllers: [orders_controller_1.OrdersController],
         providers: [orders_service_1.OrdersService],

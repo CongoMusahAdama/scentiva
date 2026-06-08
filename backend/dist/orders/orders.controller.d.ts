@@ -4,8 +4,8 @@ export declare class OrdersController {
     private readonly ordersService;
     constructor(ordersService: OrdersService);
     create(createOrderDto: CreateOrderDto): Promise<import("./schemas/order.schema").Order>;
-    findAll(phone?: string): Promise<import("./schemas/order.schema").Order[]>;
-    findOne(id: string): Promise<import("./schemas/order.schema").Order>;
+    findAll(req: any, phone?: string, page?: number, limit?: number): Promise<import("./schemas/order.schema").Order[]>;
+    findOne(req: any, id: string): Promise<import("./schemas/order.schema").Order>;
     update(id: string, updateOrderDto: UpdateOrderDto): Promise<import("./schemas/order.schema").Order>;
     remove(id: string): Promise<void>;
 }

@@ -14,12 +14,14 @@ const admin_service_1 = require("./admin.service");
 const user_schema_1 = require("../users/schemas/user.schema");
 const order_schema_1 = require("../orders/schemas/order.schema");
 const product_schema_1 = require("../products/schemas/product.schema");
+const auth_module_1 = require("../auth/auth.module");
 let AdminModule = class AdminModule {
 };
 exports.AdminModule = AdminModule;
 exports.AdminModule = AdminModule = __decorate([
     (0, common_1.Module)({
         imports: [
+            auth_module_1.AuthModule,
             mongoose_1.MongooseModule.forFeature([
                 { name: user_schema_1.User.name, schema: user_schema_1.UserSchema },
                 { name: order_schema_1.Order.name, schema: order_schema_1.OrderSchema },

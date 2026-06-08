@@ -1,10 +1,13 @@
 "use client";
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import {
+  type Theme,
+  THEME_STORAGE_KEY,
+  resolveTheme,
+} from "@/lib/theme";
 
-export type Theme = "light" | "dark";
-
-const STORAGE_KEY = "scentiva-theme";
+export type { Theme };
 
 interface ThemeContextType {
   theme: Theme;
@@ -22,18 +25,17 @@ function applyTheme(theme: Theme) {
 }
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setThemeState] = useState<Theme>("light");
+  const [theme, setThemeState] = useState<Theme>("dark");
 
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY) as Theme | null;
-    const initial: Theme = stored === "dark" ? "dark" : "light";
+    const initial = resolveTheme(localStorage.getItem(THEME_STORAGE_KEY));
     setThemeState(initial);
     applyTheme(initial);
   }, []);
 
   const setTheme = (next: Theme) => {
     setThemeState(next);
-    localStorage.setItem(STORAGE_KEY, next);
+    localStorage.setItem(THEME_STORAGE_KEY, next);
     applyTheme(next);
   };
 

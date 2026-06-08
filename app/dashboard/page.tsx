@@ -11,7 +11,8 @@ import { useAuth } from "@/context/AuthContext";
 import { motion, AnimatePresence } from "framer-motion";
 import { Search, Bell, User } from "lucide-react";
 import Image from "next/image";
-import ProductModal, { type Product } from "@/components/ProductModal";
+import ProductModal from "@/components/ProductModal";
+import type { Product } from "@/lib/types/product";
 
 
 

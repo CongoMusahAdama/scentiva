@@ -16,6 +16,10 @@ exports.OrdersController = void 0;
 const common_1 = require("@nestjs/common");
 const orders_service_1 = require("./orders.service");
 const order_dto_1 = require("./dto/order.dto");
+const jwt_auth_guard_1 = require("../auth/guards/jwt-auth.guard");
+const roles_guard_1 = require("../auth/guards/roles.guard");
+const roles_decorator_1 = require("../auth/decorators/roles.decorator");
+const user_schema_1 = require("../users/schemas/user.schema");
 let OrdersController = class OrdersController {
     constructor(ordersService) {
         this.ordersService = ordersService;
@@ -23,11 +27,18 @@ let OrdersController = class OrdersController {
     create(createOrderDto) {
         return this.ordersService.create(createOrderDto);
     }
-    findAll(phone) {
-        return this.ordersService.findAll(phone);
+    findAll(req, phone, page, limit) {
+        const isAdmin = req.user?.role?.toUpperCase() === user_schema_1.UserRole.ADMIN;
+        const scopedPhone = isAdmin ? phone : req.user.phone;
+        return this.ordersService.findAll(scopedPhone, page, limit);
     }
-    findOne(id) {
-        return this.ordersService.findOne(id);
+    async findOne(req, id) {
+        const order = await this.ordersService.findOne(id);
+        const isAdmin = req.user?.role?.toUpperCase() === user_schema_1.UserRole.ADMIN;
+        if (!isAdmin && order.phone !== req.user.phone) {
+            throw new common_1.ForbiddenException('You can only view your own orders');
+        }
+        return order;
     }
     update(id, updateOrderDto) {
         return this.ordersService.update(id, updateOrderDto);
@@ -46,19 +57,24 @@ __decorate([
 ], OrdersController.prototype, "create", null);
 __decorate([
     (0, common_1.Get)(),
-    __param(0, (0, common_1.Query)('phone')),
+    __param(0, (0, common_1.Request)()),
+    __param(1, (0, common_1.Query)('phone')),
+    __param(2, (0, common_1.Query)('page', new common_1.DefaultValuePipe(1), common_1.ParseIntPipe)),
+    __param(3, (0, common_1.Query)('limit', new common_1.DefaultValuePipe(50), common_1.ParseIntPipe)),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
+    __metadata("design:paramtypes", [Object, String, Number, Number]),
     __metadata("design:returntype", void 0)
 ], OrdersController.prototype, "findAll", null);
 __decorate([
     (0, common_1.Get)(':id'),
-    __param(0, (0, common_1.Param)('id')),
+    __param(0, (0, common_1.Request)()),
+    __param(1, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
-    __metadata("design:paramtypes", [String]),
-    __metadata("design:returntype", void 0)
+    __metadata("design:paramtypes", [Object, String]),
+    __metadata("design:returntype", Promise)
 ], OrdersController.prototype, "findOne", null);
 __decorate([
+    (0, roles_decorator_1.Roles)(user_schema_1.UserRole.ADMIN),
     (0, common_1.Put)(':id'),
     __param(0, (0, common_1.Param)('id')),
     __param(1, (0, common_1.Body)()),
@@ -67,6 +83,7 @@ __decorate([
     __metadata("design:returntype", void 0)
 ], OrdersController.prototype, "update", null);
 __decorate([
+    (0, roles_decorator_1.Roles)(user_schema_1.UserRole.ADMIN),
     (0, common_1.Delete)(':id'),
     __param(0, (0, common_1.Param)('id')),
     __metadata("design:type", Function),
@@ -75,6 +92,7 @@ __decorate([
 ], OrdersController.prototype, "remove", null);
 exports.OrdersController = OrdersController = __decorate([
     (0, common_1.Controller)('orders'),
+    (0, common_1.UseGuards)(jwt_auth_guard_1.JwtAuthGuard, roles_guard_1.RolesGuard),
     __metadata("design:paramtypes", [orders_service_1.OrdersService])
 ], OrdersController);
 //# sourceMappingURL=orders.controller.js.map

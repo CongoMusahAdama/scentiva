@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useSearchParams } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import ProductCard from "@/components/ProductCard";
-import type { Product } from "@/components/ProductModal";
+import type { Product } from "@/lib/types/product";
 import { allProducts } from "@/lib/products";
 
 // ─── Filter Config ──────────────────────────────────────────────────────────

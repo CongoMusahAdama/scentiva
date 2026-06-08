@@ -51,4 +51,6 @@ exports.Order = Order = __decorate([
     (0, mongoose_1.Schema)({ timestamps: true })
 ], Order);
 exports.OrderSchema = mongoose_1.SchemaFactory.createForClass(Order);
+exports.OrderSchema.index({ phone: 1 });
+exports.OrderSchema.index({ status: 1 });
 //# sourceMappingURL=order.schema.js.map

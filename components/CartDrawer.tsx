@@ -1,10 +1,18 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import { X, Minus, Plus, ShoppingBag, MessageSquare } from "lucide-react";
 import { useCart } from "@/context/CartContext";
 import { motion, AnimatePresence } from "framer-motion";
+import DeliveryDetailsForm from "@/components/DeliveryDetailsForm";
+import { useWhatsAppCheckout } from "@/hooks/useWhatsAppCheckout";
+import {
+  defaultDeliveryDetails,
+  loadDeliveryDetails,
+  type DeliveryDetails,
+} from "@/lib/delivery";
+import { useAuth } from "@/context/AuthContext";
 
 type Props = {
   isOpen: boolean;
@@ -13,18 +21,32 @@ type Props = {
 
 const CartDrawer = ({ isOpen, onClose }: Props) => {
   const { cart, removeFromCart, updateQuantity, totalPrice, totalItems, clearCart } = useCart();
+  const { user } = useAuth();
+  const checkoutWhatsApp = useWhatsAppCheckout();
+  const [delivery, setDelivery] = useState<DeliveryDetails>(defaultDeliveryDetails);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const saved = loadDeliveryDetails();
+    setDelivery({
+      ...saved,
+      fullName: saved.fullName || user?.fullName || "",
+      phone: saved.phone || user?.phone || "",
+    });
+  }, [isOpen, user]);
 
   const handleWhatsAppCheckout = () => {
-    const phone = "233506626068";
-    let message = "Hello Scentiva Aura, I would like to place an order:%0A%0A";
-    
-    cart.forEach((item) => {
-      message += `• *${item.name}* [${item.id}] (x${item.quantity}) - GH₵ ${item.price * item.quantity}%0A`;
-    });
-    
-    message += `%0A*Total Amount: GH₵ ${totalPrice}*%0A%0ACompany: Scentiva Aura %0AContact me for delivery details.`;
-    
-    window.open(`https://wa.me/${phone}?text=${message}`, "_blank");
+    checkoutWhatsApp(
+      cart.map((item) => ({
+        name: item.name,
+        id: item.id,
+        quantity: item.quantity,
+        price: item.price,
+        image: item.image,
+      })),
+      totalPrice,
+      delivery
+    );
   };
 
   return (
@@ -108,8 +130,9 @@ const CartDrawer = ({ isOpen, onClose }: Props) => {
 
             {/* Footer */}
             {cart.length > 0 && (
-              <div className="p-8 border-t border-parchment/10 bg-elevated space-y-6">
-                <div className="flex justify-between items-end">
+              <div className="p-6 border-t border-parchment/10 bg-elevated space-y-4">
+                <DeliveryDetailsForm value={delivery} onChange={setDelivery} compact defaultOpen />
+                <div className="flex justify-between items-end pt-1">
                   <span className="text-xs uppercase tracking-[0.2em] text-parchment/40">Estimated Total</span>
                   <span className="text-2xl font-serif text-gold-oud">GH₵ {totalPrice}</span>
                 </div>
@@ -121,7 +144,7 @@ const CartDrawer = ({ isOpen, onClose }: Props) => {
                   Order via WhatsApp
                 </button>
                 <p className="text-[10px] text-center text-parchment/30 uppercase tracking-widest">
-                  Secure checkout • Delivery calculated on chat
+                  Secure checkout • Delivery details sent on WhatsApp
                 </p>
               </div>
             )}

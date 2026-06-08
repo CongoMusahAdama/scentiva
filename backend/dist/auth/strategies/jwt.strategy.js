@@ -19,7 +19,7 @@ let JwtStrategy = class JwtStrategy extends (0, passport_1.PassportStrategy)(pas
         super({
             jwtFromRequest: passport_jwt_1.ExtractJwt.fromAuthHeaderAsBearerToken(),
             ignoreExpiration: false,
-            secretOrKey: configService.get('JWT_SECRET') || 'scentiva_ultra_secure_secret_key_2024',
+            secretOrKey: configService.getOrThrow('JWT_SECRET'),
         });
         this.configService = configService;
     }

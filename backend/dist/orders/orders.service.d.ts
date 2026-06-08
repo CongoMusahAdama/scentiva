@@ -9,9 +9,11 @@ export declare class OrdersService {
     private mailService;
     private usersService;
     private smsService;
+    private readonly logger;
     constructor(orderModel: Model<Order>, mailService: MailService, usersService: UsersService, smsService: SmsService);
     create(createOrderDto: CreateOrderDto): Promise<Order>;
-    findAll(phone?: string): Promise<Order[]>;
+    private sendOrderNotifications;
+    findAll(phone?: string, page?: number, limit?: number): Promise<Order[]>;
     findOne(id: string): Promise<Order>;
     update(id: string, updateOrderDto: UpdateOrderDto): Promise<Order>;
     private notifyCustomer;

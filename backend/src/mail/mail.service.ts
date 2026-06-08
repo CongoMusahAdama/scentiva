@@ -11,10 +11,10 @@ export class MailService {
   }
 
   async sendOtp(to: string, otp: string) {
-    console.log(`\n\n========================================`);
-    console.log(` DEVELOPMENT OTP CODE FOR ${to}: ${otp}`);
-    console.log(`========================================\n\n`);
-    
+    if (process.env.NODE_ENV !== 'production') {
+      console.log(`[DEV] OTP sent to ${to}`);
+    }
+
     try {
       await this.resend.emails.send({
         from: 'Scentiva Aura <onboarding@resend.dev>',

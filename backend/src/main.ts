@@ -13,7 +13,13 @@ async function bootstrap() {
     'http://localhost:3000',
   ].filter(Boolean) as string[];
 
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(
+    new ValidationPipe({
+      whitelist: true,
+      forbidNonWhitelisted: true,
+      transform: true,
+    }),
+  );
   app.enableCors({
     origin: (origin, callback) => {
       if (
@@ -28,8 +34,8 @@ async function bootstrap() {
     },
     credentials: true,
   });
-  app.use(bodyParser.json({ limit: '50mb' }));
-  app.use(bodyParser.urlencoded({ limit: '50mb', extended: true }));
+  app.use(bodyParser.json({ limit: '10mb' }));
+  app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
   
   const port = process.env.PORT || 3001;
   await app.listen(port, '0.0.0.0');

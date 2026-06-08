@@ -1,19 +1,18 @@
-import { Injectable, OnModuleInit, NotFoundException } from '@nestjs/common';
+import { Injectable, OnModuleInit, NotFoundException, Logger } from '@nestjs/common';
 import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
 import { User, UserRole } from './schemas/user.schema';
 import { ProductsService } from '../products/products.service';
+import { UpdateProfileDto } from './dto/update-profile.dto';
 
-export const ADMIN_CREDENTIALS = {
-  email: 'amusahcongo@gmail.com',
-  phone: '0000000000',
-  password: 'Musah@scentivaadmin12345',
-} as const;
+const BCRYPT_ROUNDS = 10;
 
 @Injectable()
 export class UsersService implements OnModuleInit {
+  private readonly logger = new Logger(UsersService.name);
+
   constructor(
     @InjectModel(User.name)
     private userModel: Model<User>,
@@ -25,43 +24,56 @@ export class UsersService implements OnModuleInit {
     await this.seedAdmin();
   }
 
+  sanitizeUser(user: User | null) {
+    if (!user) return null;
+    const obj = user.toObject();
+    delete obj.password;
+    delete obj.otp;
+    delete obj.otpExpires;
+    return obj;
+  }
+
   async deleteAllCustomers(): Promise<number> {
     const result = await this.userModel.deleteMany({ role: UserRole.CUSTOMER }).exec();
     return result.deletedCount;
   }
 
   private async seedAdmin() {
-    const { email: adminEmail, phone: adminPhone, password: adminPassword } = ADMIN_CREDENTIALS;
+    const adminEmail = this.configService.get<string>('ADMIN_EMAIL');
+    const adminPhone = this.configService.get<string>('ADMIN_PHONE');
+    const adminPassword = this.configService.get<string>('ADMIN_PASSWORD');
+
+    if (!adminEmail || !adminPhone || !adminPassword) {
+      this.logger.warn('Admin seed skipped — set ADMIN_EMAIL, ADMIN_PHONE, ADMIN_PASSWORD in env');
+      return;
+    }
 
     try {
-      const existingAdmin = await this.userModel.findOne({ 
-        $or: [{ email: adminEmail }, { phone: adminPhone }] 
+      const existingAdmin = await this.userModel.findOne({
+        $or: [{ email: adminEmail }, { phone: adminPhone }],
       });
 
       if (!existingAdmin) {
-        const hashedPassword = await bcrypt.hash(adminPassword, 10);
+        const hashedPassword = await bcrypt.hash(adminPassword, BCRYPT_ROUNDS);
         await this.userModel.create({
           phone: adminPhone,
           email: adminEmail,
           password: hashedPassword,
           fullName: 'Scentiva Admin',
           role: UserRole.ADMIN,
-          isVerified: true, // Auto-verify admin on seed
+          isVerified: true,
         });
-        console.log('✅ Default admin user created');
-      } else {
-        // Ensure existing admin is verified
-        if (existingAdmin.role === UserRole.ADMIN && !existingAdmin.isVerified) {
-          existingAdmin.isVerified = true;
-          await existingAdmin.save();
-          console.log('✅ Default admin user verified');
-        }
+        this.logger.log('Default admin user created');
+      } else if (existingAdmin.role === UserRole.ADMIN && !existingAdmin.isVerified) {
+        existingAdmin.isVerified = true;
+        await existingAdmin.save();
+        this.logger.log('Default admin user verified');
       }
     } catch (error) {
       if (error.code === 11000) {
-        console.warn('⚠️ Admin user already exists (duplicate key). skipping seed.');
+        this.logger.warn('Admin user already exists — skipping seed');
       } else {
-        console.error('❌ Error seeding admin user:', error);
+        this.logger.error('Error seeding admin user', error);
       }
     }
   }
@@ -78,17 +90,29 @@ export class UsersService implements OnModuleInit {
   }
 
   async findById(id: string): Promise<User | null> {
-    return this.userModel.findById(id).exec();
+    return this.userModel.findById(id).select('-password -otp -otpExpires').exec();
   }
 
-  async update(id: string, updateData: any): Promise<User | null> {
-    return this.userModel.findByIdAndUpdate(id, updateData, { new: true }).exec();
+  async update(id: string, updateData: Record<string, unknown>): Promise<User | null> {
+    const user = await this.userModel
+      .findByIdAndUpdate(id, updateData, { new: true })
+      .select('-password -otp -otpExpires')
+      .exec();
+    return user;
+  }
+
+  async updateProfile(id: string, dto: UpdateProfileDto): Promise<User | null> {
+    const updateData: Record<string, unknown> = {};
+    if (dto.fullName) updateData.fullName = dto.fullName;
+    if (dto.email) updateData.email = dto.email;
+    if (dto.password) {
+      updateData.password = await bcrypt.hash(dto.password, BCRYPT_ROUNDS);
+    }
+    return this.update(id, updateData);
   }
 
   async updateProfileImage(id: string, profileImage: string): Promise<User | null> {
-    return this.userModel
-      .findByIdAndUpdate(id, { profileImage }, { new: true })
-      .exec();
+    return this.update(id, { profileImage });
   }
 
   async toggleWishlist(userId: string, productId: string) {
@@ -108,11 +132,8 @@ export class UsersService implements OnModuleInit {
   async getWishlist(userId: string) {
     const user = await this.userModel.findById(userId);
     if (!user) throw new NotFoundException('User not found');
+    if (!user.wishlist.length) return [];
 
-    // Fetch product details for each ID in wishlist
-    const products = await Promise.all(
-      user.wishlist.map(id => this.productsService.findOne(id).catch(() => null))
-    );
-    return products.filter(p => p !== null);
+    return this.productsService.findByIds(user.wishlist);
   }
 }

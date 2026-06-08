@@ -29,3 +29,5 @@ export class Order extends Document {
 }
 
 export const OrderSchema = SchemaFactory.createForClass(Order);
+OrderSchema.index({ phone: 1 });
+OrderSchema.index({ status: 1 });

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -14,42 +14,23 @@ import {
   CheckCircle2,
   User,
   Package,
-  Moon,
-  Sun,
-  GraduationCap,
-  Briefcase,
   Sunrise,
-  Dumbbell,
-  Backpack,
-  Scissors,
-  PartyPopper,
-  ShoppingBag,
-  Gift,
-  Landmark,
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
-import type { Product } from "@/components/ProductModal";
+import DeliveryDetailsForm from "@/components/DeliveryDetailsForm";
+import type { Product } from "@/lib/types/product";
+import { productIconMap } from "@/lib/product-icons";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import { WishlistService } from "@/lib/services/wishlist.service";
 import { showSuccess, showError } from "@/lib/swal";
-
-const iconMap: Record<string, React.ElementType> = {
-  Moon,
-  Heart,
-  Landmark,
-  Sun,
-  GraduationCap,
-  Briefcase,
-  Sunrise,
-  Dumbbell,
-  Backpack,
-  Scissors,
-  PartyPopper,
-  ShoppingBag,
-  Gift,
-};
+import { useWhatsAppCheckout } from "@/hooks/useWhatsAppCheckout";
+import {
+  defaultDeliveryDetails,
+  loadDeliveryDetails,
+  type DeliveryDetails,
+} from "@/lib/delivery";
 
 type Props = {
   product: Product;
@@ -59,14 +40,47 @@ const ProductDetailView = ({ product }: Props) => {
   const router = useRouter();
   const { addToCart, showCartToast } = useCart();
   const { user } = useAuth();
+  const checkoutWhatsApp = useWhatsAppCheckout();
   const [qty, setQty] = useState(1);
   const [isWishlisted, setIsWishlisted] = useState(false);
+  const [delivery, setDelivery] = useState<DeliveryDetails>(defaultDeliveryDetails);
 
   const returnTo = `/shop/${product.id}`;
 
-  const whatsappMessage = encodeURIComponent(
-    `Hello Scentiva, I am ${user?.fullName || "a customer"} and I would like to order: ${product.name} x${qty} (SKU: ${product.id}) — GH₵ ${product.actual * qty}`
-  );
+  useEffect(() => {
+    const saved = loadDeliveryDetails();
+    setDelivery({
+      ...saved,
+      fullName: saved.fullName || user?.fullName || "",
+      phone: saved.phone || user?.phone || "",
+    });
+  }, [user]);
+
+  useEffect(() => {
+    if (!user) return;
+    WishlistService.getWishlist()
+      .then((wishlist) => {
+        const inWishlist = wishlist.some((item: string | { id: string }) =>
+          typeof item === "string" ? item === product.id : item.id === product.id
+        );
+        setIsWishlisted(inWishlist);
+      })
+      .catch(() => {});
+  }, [user, product.id]);
+
+  const handleWhatsAppCheckout = () => {
+    checkoutWhatsApp(
+      [{
+        name: product.name,
+        id: product.id,
+        quantity: qty,
+        price: product.actual,
+        image: product.image,
+      }],
+      product.actual * qty,
+      delivery
+    );
+  };
 
   const handleAddToCart = () => {
     if (!user) {
@@ -74,8 +88,8 @@ const ProductDetailView = ({ product }: Props) => {
       router.push(`/signin?returnTo=${encodeURIComponent(returnTo)}`);
       return;
     }
-    for (let i = 0; i < qty; i++) addToCart(product);
-    showCartToast({ name: product.name, image: product.image, price: product.actual });
+    addToCart(product, qty);
+    showCartToast({ name: product.name, image: product.image, price: product.actual * qty });
     showSuccess("Added to Cart", `${product.name} is ready for checkout.`);
   };
 
@@ -211,17 +225,18 @@ const ProductDetailView = ({ product }: Props) => {
                     </Link>
                   )
                 )}
-                <a
-                  href={`https://wa.me/233506626068?text=${whatsappMessage}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <button
+                  type="button"
+                  onClick={handleWhatsAppCheckout}
                   className="inline-flex items-center justify-center gap-2 bg-[#25D366] text-white px-4 py-2.5 hover:opacity-90 transition-opacity text-xs"
                 >
                   <MessageCircle size={14} />
                   Checkout on WhatsApp
-                </a>
+                </button>
               </div>
             </div>
+
+            <DeliveryDetailsForm value={delivery} onChange={setDelivery} />
 
             {/* Account strip — compact */}
             {user ? (
@@ -258,62 +273,68 @@ const ProductDetailView = ({ product }: Props) => {
           </div>
         </div>
 
-        {/* Product story — full width, compact grid */}
-        <div className="mt-6 lg:mt-8 pt-6 border-t border-parchment/10 grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4 lg:gap-5 normal-case">
-          <div className="md:col-span-2 xl:col-span-1">
-            <p className="text-[10px] uppercase tracking-[0.2em] text-gold-oud mb-2">About this scent</p>
-            <p className="text-sm text-parchment/75 leading-relaxed">{product.desc}</p>
-            <div className="mt-3 flex items-start gap-2 px-3 py-2 bg-gold-oud/5 border border-gold-oud/20">
-              <Sunrise size={13} className="text-gold-oud flex-shrink-0 mt-0.5" />
-              <p className="text-xs text-parchment/80 leading-relaxed">
-                <span className="text-gold-oud font-bold uppercase tracking-wider">Perfect for: </span>
-                {product.perfectOccasion}
-              </p>
-            </div>
-          </div>
+        {/* Product story */}
+        <section className="mt-8 lg:mt-10 pt-8 border-t border-parchment/10 normal-case">
+          <h2 className="font-poppins text-[11px] font-semibold uppercase tracking-[0.22em] text-gold-oud mb-4">
+            About this scent
+          </h2>
 
-          {product.whenToApply?.length > 0 && (
-            <div>
-              <p className="text-[10px] uppercase tracking-[0.2em] text-gold-oud mb-2 flex items-center gap-1.5">
-                <Clock size={11} />
-                When to wear it
-              </p>
-              <div className="flex gap-2 overflow-x-auto pb-1 md:grid md:grid-cols-3 md:overflow-visible">
-                {product.whenToApply.map((w, i) => {
-                  const IconComp = iconMap[w.icon] || Clock;
-                  return (
-                    <div
-                      key={i}
-                      className="flex-shrink-0 w-[100px] md:w-auto border border-parchment/10 bg-parchment/5 px-2.5 py-2 text-center"
-                    >
-                      <IconComp size={14} className="text-gold-oud mx-auto mb-1" strokeWidth={1.5} />
-                      <span className="block text-[9px] font-bold uppercase tracking-wider leading-tight">
-                        {w.label}
-                      </span>
-                      <span className="block text-[8px] text-parchment/45 mt-0.5 leading-tight">
-                        {w.detail}
-                      </span>
-                    </div>
-                  );
-                })}
+          <p className="font-lora text-[17px] sm:text-[19px] text-parchment leading-[1.65] max-w-2xl">
+            {product.desc}
+          </p>
+
+          <p className="mt-4 font-poppins text-[13px] text-parchment/70 leading-relaxed max-w-2xl">
+            <span className="text-parchment font-semibold">Perfect for</span>
+            <span className="text-parchment/40 mx-2">·</span>
+            {product.perfectOccasion}
+          </p>
+
+          <div className="mt-8 grid grid-cols-1 lg:grid-cols-5 gap-6 lg:gap-8">
+            {product.whenToApply?.length > 0 && (
+              <div className="lg:col-span-3">
+                <p className="font-poppins text-[11px] font-semibold uppercase tracking-[0.18em] text-parchment/50 mb-3 flex items-center gap-2">
+                  <Clock size={12} className="text-gold-oud" />
+                  When to wear it
+                </p>
+                <div className="grid grid-cols-3 gap-2 sm:gap-3">
+                  {product.whenToApply.map((w, i) => {
+                    const IconComp = productIconMap[w.icon] || Clock;
+                    return (
+                      <div
+                        key={i}
+                        className="flex flex-col items-center text-center border border-parchment/12 bg-elevated px-2 py-4 sm:px-3 sm:py-5"
+                      >
+                        <IconComp size={18} className="text-gold-oud mb-2" strokeWidth={1.5} />
+                        <span className="font-poppins text-[11px] font-semibold text-parchment leading-tight">
+                          {w.label}
+                        </span>
+                        <span className="font-poppins text-[10px] text-parchment/50 mt-1 leading-snug">
+                          {w.detail}
+                        </span>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          )}
+            )}
 
-          {product.pros?.length > 0 && (
-            <div>
-              <p className="text-[10px] uppercase tracking-[0.2em] text-gold-oud mb-2">Highlights</p>
-              <ul className="space-y-1.5">
-                {product.pros.slice(0, 4).map((pro) => (
-                  <li key={pro} className="flex items-start gap-2 text-xs text-parchment/65 leading-relaxed">
-                    <CheckCircle2 size={11} className="text-emerald-400 flex-shrink-0 mt-0.5" />
-                    {pro}
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
-        </div>
+            {product.pros?.length > 0 && (
+              <div className={product.whenToApply?.length ? "lg:col-span-2" : "lg:col-span-5"}>
+                <p className="font-poppins text-[11px] font-semibold uppercase tracking-[0.18em] text-parchment/50 mb-3">
+                  Highlights
+                </p>
+                <ul className="space-y-2.5 border border-parchment/12 bg-elevated px-4 py-4 sm:px-5 sm:py-5">
+                  {product.pros.slice(0, 4).map((pro) => (
+                    <li key={pro} className="flex items-start gap-2.5 font-poppins text-[13px] text-parchment/75 leading-relaxed">
+                      <CheckCircle2 size={14} className="text-gold-oud flex-shrink-0 mt-0.5" strokeWidth={2} />
+                      {pro}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
+          </div>
+        </section>
 
         {/* Delivery — always visible, one line */}
         <p className="mt-5 pt-4 border-t border-parchment/10 text-parchment/45 normal-case text-xs leading-relaxed">

@@ -43,4 +43,5 @@ exports.Review = Review = __decorate([
     (0, mongoose_1.Schema)({ timestamps: true })
 ], Review);
 exports.ReviewSchema = mongoose_1.SchemaFactory.createForClass(Review);
+exports.ReviewSchema.index({ customer: 1 });
 //# sourceMappingURL=review.schema.js.map

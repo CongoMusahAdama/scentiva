@@ -1,57 +1,64 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+import { jwtVerify } from "jose";
 
-export function middleware(request: NextRequest) {
+type JwtPayload = {
+  role?: string;
+  sub?: string;
+  phone?: string;
+};
+
+async function verifyToken(token: string): Promise<JwtPayload | null> {
+  const secret = process.env.JWT_SECRET;
+  if (!secret) return null;
+  try {
+    const { payload } = await jwtVerify(token, new TextEncoder().encode(secret));
+    return payload as JwtPayload;
+  } catch {
+    return null;
+  }
+}
+
+export async function middleware(request: NextRequest) {
   try {
     const { pathname } = request.nextUrl;
-    console.log(`[Middleware] Processing request for: ${pathname}`);
-    
-    const token = request.cookies.get('scentiva_token')?.value;
-    const userStr = request.cookies.get('scentiva_user')?.value;
+    const token = request.cookies.get("scentiva_token")?.value;
 
-    // Paths that require authentication
-    const isDashboardPage = pathname.startsWith('/dashboard');
-    const isAdminPage = pathname.startsWith('/admin');
-    const isAuthPage = pathname === '/signin' || pathname === '/signup' || pathname === '/verify-otp';
+    const isDashboardPage = pathname.startsWith("/dashboard");
+    const isAdminPage = pathname.startsWith("/admin");
+    const isAuthPage = pathname === "/signin" || pathname === "/signup" || pathname === "/verify-otp";
+    const isProtected = isDashboardPage || isAdminPage;
 
-    if ((isDashboardPage || isAdminPage) && !token) {
-      return NextResponse.redirect(new URL('/signin', request.url));
+    if (isProtected && !token) {
+      return NextResponse.redirect(new URL("/signin", request.url));
     }
 
-    if (isAdminPage && userStr) {
-      try {
-        const decodedUser = decodeURIComponent(userStr);
-        const user = JSON.parse(decodedUser);
-        if (user.role?.toUpperCase() !== 'ADMIN') {
-          return NextResponse.redirect(new URL('/dashboard', request.url));
-        }
-      } catch (e) {
-        return NextResponse.redirect(new URL('/signin', request.url));
+    let payload: JwtPayload | null = null;
+    if (token) {
+      payload = await verifyToken(token);
+      if (isProtected && !payload) {
+        const response = NextResponse.redirect(new URL("/signin", request.url));
+        response.cookies.delete("scentiva_token");
+        response.cookies.delete("scentiva_user");
+        return response;
       }
     }
 
-    if (isAuthPage && token) {
-       // User is already logged in, redirect away from auth pages
-       try {
-         const decodedUser = userStr ? decodeURIComponent(userStr) : null;
-         const user = decodedUser ? JSON.parse(decodedUser) : null;
-         if (user?.role?.toUpperCase() === 'ADMIN') {
-           return NextResponse.redirect(new URL('/admin', request.url));
-         }
-         return NextResponse.redirect(new URL('/dashboard', request.url));
-       } catch (e) {
-         // If cookie is malformed, proceed to auth page (where it will likely be cleared/replaced)
-         return NextResponse.next();
-       }
+    if (isAdminPage && payload?.role?.toUpperCase() !== "ADMIN") {
+      return NextResponse.redirect(new URL("/dashboard", request.url));
+    }
+
+    if (isAuthPage && payload) {
+      const destination = payload.role?.toUpperCase() === "ADMIN" ? "/admin" : "/dashboard";
+      return NextResponse.redirect(new URL(destination, request.url));
     }
 
     return NextResponse.next();
-  } catch (err) {
-    console.error('[Middleware Error]:', err);
-    return NextResponse.next();
+  } catch {
+    return NextResponse.redirect(new URL("/signin", request.url));
   }
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/admin/:path*', '/signin', '/signup', '/verify-otp'],
+  matcher: ["/dashboard/:path*", "/admin/:path*", "/signin", "/signup", "/verify-otp"],
 };

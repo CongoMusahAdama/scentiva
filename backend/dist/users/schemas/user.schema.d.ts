@@ -11,8 +11,8 @@ export declare class User extends Document {
     role: UserRole;
     profileImage: string;
     isVerified: boolean;
-    otp: string;
-    otpExpires: Date;
+    otp?: string;
+    otpExpires?: Date;
     wishlist: string[];
 }
 export declare const UserSchema: import("mongoose").Schema<User, import("mongoose").Model<User, any, any, any, any, any, User>, {}, {}, {}, {}, import("mongoose").DefaultSchemaOptions, User, Document<unknown, {}, User, {
@@ -96,7 +96,7 @@ export declare const UserSchema: import("mongoose").Schema<User, import("mongoos
     }, "id"> & {
         id: string;
     }> | undefined;
-    otp?: import("mongoose").SchemaDefinitionProperty<string, User, Document<unknown, {}, User, {
+    otp?: import("mongoose").SchemaDefinitionProperty<string | undefined, User, Document<unknown, {}, User, {
         id: string;
     }, import("mongoose").DefaultSchemaOptions> & Omit<User & Required<{
         _id: import("mongoose").Types.ObjectId;
@@ -105,7 +105,7 @@ export declare const UserSchema: import("mongoose").Schema<User, import("mongoos
     }, "id"> & {
         id: string;
     }> | undefined;
-    otpExpires?: import("mongoose").SchemaDefinitionProperty<Date, User, Document<unknown, {}, User, {
+    otpExpires?: import("mongoose").SchemaDefinitionProperty<Date | undefined, User, Document<unknown, {}, User, {
         id: string;
     }, import("mongoose").DefaultSchemaOptions> & Omit<User & Required<{
         _id: import("mongoose").Types.ObjectId;

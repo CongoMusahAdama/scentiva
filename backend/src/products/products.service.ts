@@ -49,6 +49,11 @@ export class ProductsService implements OnModuleInit {
     return product;
   }
 
+  async findByIds(ids: string[]): Promise<Product[]> {
+    if (!ids.length) return [];
+    return this.productModel.find({ id: { $in: ids } }).exec();
+  }
+
   async update(id: string, updateProductDto: UpdateProductDto): Promise<Product> {
     const updatedProduct = await this.productModel
       .findOneAndUpdate({ id }, updateProductDto, { new: true })

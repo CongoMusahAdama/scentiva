@@ -1,7 +1,7 @@
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from '../app.module';
 import { CustomersService } from '../customers/customers.service';
-import { UsersService, ADMIN_CREDENTIALS } from '../users/users.service';
+import { UsersService } from '../users/users.service';
 
 async function bootstrap() {
   const app = await NestFactory.createApplicationContext(AppModule, {
@@ -16,10 +16,7 @@ async function bootstrap() {
 
   console.log(`✅ Deleted ${customerRecords} customer records`);
   console.log(`✅ Deleted ${customerAccounts} customer accounts (admin kept)`);
-  console.log('Admin login credentials:');
-  console.log(`  Email:    ${ADMIN_CREDENTIALS.email}`);
-  console.log(`  Phone:    ${ADMIN_CREDENTIALS.phone}`);
-  console.log(`  Password: ${ADMIN_CREDENTIALS.password}`);
+  console.log('Admin credentials are configured via ADMIN_EMAIL, ADMIN_PHONE, ADMIN_PASSWORD env vars.');
 
   await app.close();
 }
