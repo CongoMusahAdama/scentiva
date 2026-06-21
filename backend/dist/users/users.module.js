@@ -22,7 +22,7 @@ exports.UsersModule = UsersModule = __decorate([
         imports: [
             mongoose_1.MongooseModule.forFeature([{ name: user_schema_1.User.name, schema: user_schema_1.UserSchema }]),
             cloudinary_module_1.CloudinaryModule,
-            products_module_1.ProductsModule,
+            (0, common_1.forwardRef)(() => products_module_1.ProductsModule),
         ],
         controllers: [users_controller_1.UsersController],
         providers: [users_service_1.UsersService],

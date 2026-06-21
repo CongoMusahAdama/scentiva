@@ -138,13 +138,13 @@ const CartDrawer = ({ isOpen, onClose }: Props) => {
                 </div>
                 <button 
                   onClick={handleWhatsAppCheckout}
-                  className="w-full bg-gold-oud text-deep-noir py-5 text-xs font-bold uppercase tracking-[0.2em] flex items-center justify-center gap-3 hover:bg-emerald-500 hover:text-parchment transition-all duration-500 rounded-sm shadow-xl group"
+                  className="w-full bg-[#25D366] text-white py-4 text-sm font-bold flex items-center justify-center gap-2 hover:opacity-90 transition-opacity normal-case"
                 >
-                  <MessageSquare size={18} className="group-hover:scale-110 transition-transform" />
-                  Order via WhatsApp
+                  <MessageSquare size={18} />
+                  Order on WhatsApp
                 </button>
-                <p className="text-[10px] text-center text-parchment/30 uppercase tracking-widest">
-                  Secure checkout • Delivery details sent on WhatsApp
+                <p className="text-[11px] text-center text-parchment/40 normal-case">
+                  No account needed · Pay on delivery or MoMo
                 </p>
               </div>
             )}

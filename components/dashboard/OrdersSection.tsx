@@ -95,7 +95,7 @@ const OrdersSection = () => {
                 </td>
                 <td className="px-6 py-5 text-right">
                   <a 
-                    href={`https://wa.me/233506626068?text=Hello Scentiva, I would like to follow up on my order: ${order.id}`}
+                    href={`https://wa.me/233203154307?text=Hello Scentiva, I would like to follow up on my order: ${order.id}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 text-[10px] font-bold text-[#25D366] uppercase tracking-widest hover:underline"

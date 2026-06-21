@@ -207,7 +207,7 @@ export default function ScentAssistantSection() {
                       </p>
                       <div className="flex flex-wrap justify-center gap-2">
                         <a
-                          href="https://wa.me/233506626068"
+                          href="https://wa.me/233203154307"
                           target="_blank"
                           rel="noopener noreferrer"
                           className="px-6 bg-gold-oud text-deep-noir py-2.5 text-[10px] font-bold uppercase tracking-widest hover:bg-deep-noir hover:text-surface transition-all"

@@ -144,6 +144,7 @@ exports.UsersService = UsersService;
 exports.UsersService = UsersService = UsersService_1 = __decorate([
     (0, common_1.Injectable)(),
     __param(0, (0, mongoose_1.InjectModel)(user_schema_1.User.name)),
+    __param(2, (0, common_1.Inject)((0, common_1.forwardRef)(() => products_service_1.ProductsService))),
     __metadata("design:paramtypes", [mongoose_2.Model,
         config_1.ConfigService,
         products_service_1.ProductsService])

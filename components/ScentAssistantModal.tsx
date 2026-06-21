@@ -196,7 +196,7 @@ export default function ScentAssistantModal({
                           </p>
                           <div className="flex gap-4">
                             <a 
-                              href="https://wa.me/233506626068"
+                              href="https://wa.me/233203154307"
                               target="_blank"
                               className="px-8 bg-gold-oud text-deep-noir py-4 text-[10px] font-bold uppercase tracking-widest hover:bg-deep-noir hover:text-surface transition-all"
                             >

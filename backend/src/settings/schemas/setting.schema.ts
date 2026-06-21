@@ -12,7 +12,7 @@ export class Setting extends Document {
   @Prop({ required: true, default: 'hello@scentivaaura.com' })
   email: string;
 
-  @Prop({ required: true, default: '050 915 4727' })
+  @Prop({ required: true, default: '020 315 4307' })
   whatsapp: string;
 
   @Prop({ required: true, default: '@scentivaaura' })

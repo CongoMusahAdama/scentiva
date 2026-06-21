@@ -66,16 +66,16 @@ export function saveDeliveryDetails(details: DeliveryDetails) {
 
 export function isDeliveryDetailsValid(details: DeliveryDetails): boolean {
   const phoneDigits = details.phone.replace(/\D/g, "");
-  if (!details.fullName.trim() || !details.country.trim()) return false;
+  if (!details.fullName.trim()) return false;
   if (phoneDigits.length < 9 || phoneDigits.length > 15) return false;
-  if (!details.city.trim() || !details.region.trim()) return false;
-  if (details.method === "delivery") {
-    return !!details.street.trim();
+  if (!details.city.trim()) return false;
+  if (details.method === "pickup") {
+    return !!details.pickupStation.trim();
   }
-  return !!details.pickupStation.trim();
+  return true;
 }
 
-export const WHATSAPP_NUMBER = "233506626068";
+export const WHATSAPP_NUMBER = "233203154307";
 
 export type OrderLine = {
   name: string;
@@ -128,23 +128,21 @@ export function formatDeliveryBlock(details: DeliveryDetails): string {
     "─────────────────",
     `👤 *Name:* ${sanitizeWhatsAppField(details.fullName)}`,
     `📱 *Phone:* ${sanitizeWhatsAppField(details.phone)}`,
-    `🌍 *Country:* ${sanitizeWhatsAppField(details.country)}`,
+    `📍 *Area / City:* ${sanitizeWhatsAppField(details.city)}`,
     `🚚 *Method:* ${details.method === "delivery" ? "Home Delivery" : "Pickup"}`,
-    "",
   ];
 
-  if (details.method === "delivery") {
-    lines.push(
-      "📍 *Delivery Address:*",
-      sanitizeWhatsAppField(details.street),
-      `${sanitizeWhatsAppField(details.city)}, ${sanitizeWhatsAppField(details.region)}`
-    );
-  } else {
-    lines.push(
-      "📍 *Pickup Location:*",
-      sanitizeWhatsAppField(details.pickupStation),
-      `${sanitizeWhatsAppField(details.city)}, ${sanitizeWhatsAppField(details.region)}`
-    );
+  if (details.method === "delivery" && details.street.trim()) {
+    lines.push(`🏠 *Address:* ${sanitizeWhatsAppField(details.street)}`);
+  }
+  if (details.region.trim()) {
+    lines.push(`🗺 *Region:* ${sanitizeWhatsAppField(details.region)}`);
+  }
+  if (details.method === "pickup" && details.pickupStation.trim()) {
+    lines.push(`📍 *Pickup:* ${sanitizeWhatsAppField(details.pickupStation)}`);
+  }
+  if (details.country.trim() && details.country !== "Ghana") {
+    lines.push(`🌍 *Country:* ${sanitizeWhatsAppField(details.country)}`);
   }
 
   return lines.join("\n");

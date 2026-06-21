@@ -28,7 +28,7 @@ __decorate([
     __metadata("design:type", String)
 ], Setting.prototype, "email", void 0);
 __decorate([
-    (0, mongoose_1.Prop)({ required: true, default: '050 915 4727' }),
+    (0, mongoose_1.Prop)({ required: true, default: '020 315 4307' }),
     __metadata("design:type", String)
 ], Setting.prototype, "whatsapp", void 0);
 __decorate([

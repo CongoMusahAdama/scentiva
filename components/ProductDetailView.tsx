@@ -12,15 +12,14 @@ import {
   Heart,
   Clock,
   CheckCircle2,
-  User,
   Package,
-  Sunrise,
 } from "lucide-react";
 import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 import DeliveryDetailsForm from "@/components/DeliveryDetailsForm";
 import type { Product } from "@/lib/types/product";
 import { productIconMap } from "@/lib/product-icons";
+import { USE_PLACEHOLDER_PRICES } from "@/lib/products";
 import { useCart } from "@/context/CartContext";
 import { useAuth } from "@/context/AuthContext";
 import { WishlistService } from "@/lib/services/wishlist.service";
@@ -83,14 +82,9 @@ const ProductDetailView = ({ product }: Props) => {
   };
 
   const handleAddToCart = () => {
-    if (!user) {
-      showError("Sign In Required", "Create an account or sign in to add items to your cart.");
-      router.push(`/signin?returnTo=${encodeURIComponent(returnTo)}`);
-      return;
-    }
     addToCart(product, qty);
     showCartToast({ name: product.name, image: product.image, price: product.actual * qty });
-    showSuccess("Added to Cart", `${product.name} is ready for checkout.`);
+    showSuccess("Added to Cart", `${product.name} is in your bag.`);
   };
 
   const handleWishlist = async () => {
@@ -156,6 +150,11 @@ const ProductDetailView = ({ product }: Props) => {
                   </span>
                 )}
               </p>
+              {USE_PLACEHOLDER_PRICES && (
+                <p className="text-parchment/45 normal-case text-[11px] mt-1">
+                  Launch price — final price confirmed on WhatsApp
+                </p>
+              )}
             </div>
           </div>
 
@@ -174,72 +173,66 @@ const ProductDetailView = ({ product }: Props) => {
                   </span>
                 )}
               </p>
-              <p className="text-parchment/40 normal-case text-xs">
-                From GH₵ {product.actual} — up to GH₵ {product.original} depending on size &amp; availability
-              </p>
+              {USE_PLACEHOLDER_PRICES && (
+                <p className="text-parchment/45 normal-case text-xs mb-1">
+                  Launch price — final price confirmed on WhatsApp
+                </p>
+              )}
             </div>
 
-            {/* Qty + actions — side by side on tablet+ */}
-            <div className="flex flex-wrap items-end gap-3">
-              <div className="flex-shrink-0">
-                <p className="mb-1.5 text-parchment/60 text-[10px]">Qty</p>
-                <div className="inline-flex items-center border border-parchment/20">
-                  <button
-                    type="button"
-                    onClick={() => setQty((q) => Math.max(1, q - 1))}
-                    className="px-3 py-2.5 hover:bg-parchment/5 transition-colors"
-                    aria-label="Decrease quantity"
-                  >
-                    <Minus size={14} />
-                  </button>
-                  <span className="px-4 py-2.5 min-w-[2.5rem] text-center text-sm">{qty}</span>
-                  <button
-                    type="button"
-                    onClick={() => setQty((q) => q + 1)}
-                    className="px-3 py-2.5 hover:bg-parchment/5 transition-colors"
-                    aria-label="Increase quantity"
-                  >
-                    <Plus size={14} />
-                  </button>
+            {/* Qty + actions */}
+            <div className="flex flex-col gap-3">
+              <div className="flex flex-wrap items-center gap-3">
+                <div className="flex-shrink-0">
+                  <p className="mb-1.5 text-parchment/60 text-[10px]">Qty</p>
+                  <div className="inline-flex items-center border border-parchment/20">
+                    <button
+                      type="button"
+                      onClick={() => setQty((q) => Math.max(1, q - 1))}
+                      className="px-3 py-2.5 hover:bg-parchment/5 transition-colors"
+                      aria-label="Decrease quantity"
+                    >
+                      <Minus size={14} />
+                    </button>
+                    <span className="px-4 py-2.5 min-w-[2.5rem] text-center text-sm">{qty}</span>
+                    <button
+                      type="button"
+                      onClick={() => setQty((q) => q + 1)}
+                      className="px-3 py-2.5 hover:bg-parchment/5 transition-colors"
+                      aria-label="Increase quantity"
+                    >
+                      <Plus size={14} />
+                    </button>
+                  </div>
                 </div>
               </div>
 
-              <div className="flex flex-wrap gap-2">
-                {product.status !== "sold-out" && (
-                  user ? (
-                    <button
-                      type="button"
-                      onClick={handleAddToCart}
-                      className="inline-flex items-center justify-center gap-2 border border-parchment/20 text-parchment px-4 py-2.5 hover:bg-parchment/5 transition-colors text-xs"
-                    >
-                      <ShoppingCart size={14} />
-                      Add to Cart — GH₵ {product.actual * qty}
-                    </button>
-                  ) : (
-                    <Link
-                      href={`/signin?returnTo=${encodeURIComponent(returnTo)}`}
-                      className="inline-flex items-center justify-center gap-2 border border-parchment/20 text-parchment px-4 py-2.5 hover:bg-parchment/5 transition-colors text-xs"
-                    >
-                      <User size={14} />
-                      Sign In to Add to Cart
-                    </Link>
-                  )
-                )}
+              {product.status !== "sold-out" && (
                 <button
                   type="button"
                   onClick={handleWhatsAppCheckout}
-                  className="inline-flex items-center justify-center gap-2 bg-[#25D366] text-white px-4 py-2.5 hover:opacity-90 transition-opacity text-xs"
+                  className="w-full inline-flex items-center justify-center gap-2 bg-[#25D366] text-white px-5 py-4 hover:opacity-90 transition-opacity text-sm font-bold normal-case"
                 >
-                  <MessageCircle size={14} />
-                  Checkout on WhatsApp
+                  <MessageCircle size={18} />
+                  Order on WhatsApp — GH₵ {product.actual * qty}
                 </button>
-              </div>
+              )}
+
+              {product.status !== "sold-out" && (
+                <button
+                  type="button"
+                  onClick={handleAddToCart}
+                  className="w-full inline-flex items-center justify-center gap-2 border border-parchment/20 text-parchment px-4 py-3 hover:bg-parchment/5 transition-colors text-xs normal-case"
+                >
+                  <ShoppingCart size={14} />
+                  Add to bag
+                </button>
+              )}
             </div>
 
-            <DeliveryDetailsForm value={delivery} onChange={setDelivery} />
+            <DeliveryDetailsForm value={delivery} onChange={setDelivery} defaultOpen />
 
-            {/* Account strip — compact */}
-            {user ? (
+            {user && (
               <Link
                 href="/dashboard"
                 className="inline-flex items-center gap-2.5 border border-gold-oud/30 bg-gold-oud/5 px-3 py-2.5 hover:bg-gold-oud/10 transition-colors normal-case w-fit"
@@ -249,26 +242,6 @@ const ProductDetailView = ({ product }: Props) => {
                   Track orders in your <span className="text-gold-oud font-bold">dashboard</span>
                 </span>
               </Link>
-            ) : (
-              <div className="normal-case w-fit max-w-full">
-                <p className="text-xs text-parchment/65 leading-relaxed mb-2.5">
-                  WhatsApp checkout — no account needed. Sign up to add to cart &amp; track orders.
-                </p>
-                <div className="flex flex-wrap gap-2">
-                  <Link
-                    href={`/signup?returnTo=${encodeURIComponent(returnTo)}`}
-                    className="inline-flex items-center justify-center bg-gold-oud text-deep-noir px-4 py-2 text-[10px] font-bold uppercase tracking-wider hover:opacity-90 transition-opacity"
-                  >
-                    Create Account
-                  </Link>
-                  <Link
-                    href={`/signin?returnTo=${encodeURIComponent(returnTo)}`}
-                    className="inline-flex items-center justify-center border border-parchment/25 text-parchment px-4 py-2 text-[10px] font-bold uppercase tracking-wider hover:bg-parchment/5 transition-colors"
-                  >
-                    Sign In
-                  </Link>
-                </div>
-              </div>
             )}
           </div>
         </div>
@@ -338,7 +311,7 @@ const ProductDetailView = ({ product }: Props) => {
 
         {/* Delivery — always visible, one line */}
         <p className="mt-5 pt-4 border-t border-parchment/10 text-parchment/45 normal-case text-xs leading-relaxed">
-          Delivery in Takoradi &amp; nationwide on request · Studio pickup: Takoradi, Ghana · WhatsApp 0506626068
+          Delivery in Takoradi &amp; nationwide on request · Studio pickup: Takoradi, Ghana · WhatsApp 0203154307
         </p>
       </div>
 

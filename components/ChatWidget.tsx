@@ -6,8 +6,8 @@ import { motion, AnimatePresence } from "framer-motion";
 
 export default function ChatWidget() {
   const [open, setOpen] = useState(false);
-  const whatsapp = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "233506626068";
-  const phone = "0506626068";
+  const whatsapp = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || "233203154307";
+  const phone = "0203154307";
 
   return (
     <div className="fixed bottom-6 right-4 sm:bottom-7 sm:right-7 z-[1000] flex flex-col items-end gap-3">

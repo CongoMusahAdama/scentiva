@@ -48,7 +48,7 @@ const Footer = () => {
             <div className="flex flex-col space-y-4 text-sm text-deep-noir/65 font-sans">
               <p className="flex items-center gap-2">
                 <MessageCircle size={14} className="text-deep-noir" />
-                <span>WhatsApp: 0506626068</span>
+                <span>WhatsApp: 0203154307</span>
               </p>
               <p>Studio: Takoradi, Ghana</p>
             </div>

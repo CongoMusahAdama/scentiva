@@ -13,7 +13,7 @@ import { showError } from "@/lib/swal";
 export function useWhatsAppCheckout() {
   return useCallback((lines: OrderLine[], total: number, delivery: DeliveryDetails) => {
     if (!isDeliveryDetailsValid(delivery)) {
-      showError("Delivery Details Required", "Please fill in your delivery or pickup details before checkout.");
+      showError("Almost there", "Please add your name, WhatsApp number, and city/area before ordering.");
       return;
     }
     const message = buildWhatsAppOrderMessage(lines, total, delivery);

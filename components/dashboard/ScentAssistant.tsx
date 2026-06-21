@@ -169,7 +169,7 @@ const ScentAssistant = ({ onViewProduct }: { onViewProduct: (product: any) => vo
                   </p>
                   <div className="flex gap-4">
                     <a 
-                      href="https://wa.me/233506626068"
+                      href="https://wa.me/233203154307"
                       target="_blank"
                       className="px-10 bg-[#1A1B23] text-white py-4 text-[10px] font-bold uppercase tracking-widest hover:bg-black transition-all"
                     >

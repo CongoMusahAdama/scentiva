@@ -1,6 +1,24 @@
 import type { Product } from "@/lib/types/product";
 
-export const allProducts: Product[] = [
+/** Set to false once real prices are confirmed */
+export const USE_PLACEHOLDER_PRICES = true;
+
+const PLACEHOLDER_BY_CATEGORY: Record<Product["category"], number> = {
+  mens: 99,
+  womens: 99,
+  unisex: 49,
+  gift: 149,
+};
+
+function withLaunchPricing(products: Product[]): Product[] {
+  if (!USE_PLACEHOLDER_PRICES) return products;
+  return products.map((p) => {
+    const price = PLACEHOLDER_BY_CATEGORY[p.category] ?? 79;
+    return { ...p, actual: price, original: price };
+  });
+}
+
+const rawProducts: Product[] = [
   {
     id: "SA-001",
     name: "Zara Blue Temptation",
@@ -380,3 +398,5 @@ export const allProducts: Product[] = [
     ],
   },
 ];
+
+export const allProducts = withLaunchPricing(rawProducts);

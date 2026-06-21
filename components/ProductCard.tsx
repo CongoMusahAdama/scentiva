@@ -12,9 +12,10 @@ type ProductCardProps = {
 };
 
 const ProductCard = ({ product, className = "" }: ProductCardProps) => {
-  const discount = Math.round(
-    ((product.original - product.actual) / product.original) * 100
-  );
+  const discount =
+    product.original > product.actual
+      ? Math.round(((product.original - product.actual) / product.original) * 100)
+      : 0;
   const href = getProductHref(product);
 
   return (

@@ -13,7 +13,7 @@ export default function SettingsPage() {
     storeName: "Scentiva Aura",
     tagline: "Own your scent.",
     email: "hello@scentivaaura.com",
-    whatsapp: "050 915 4727",
+    whatsapp: "020 315 4307",
     socialHandle: "@scentivaaura",
     address: "Takoradi, Ghana",
     currency: "GHS",
