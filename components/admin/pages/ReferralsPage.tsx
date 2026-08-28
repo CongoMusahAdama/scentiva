@@ -15,15 +15,7 @@ interface Referral {
   status: "active" | "pending" | "paid";
 }
 
-const initialReferrals: Referral[] = [
-  { id: 1, code: "AMA-SA42", owner: "Ama Asante", uses: 8, reward: "GHS 80", status: "paid" },
-  { id: 2, code: "KWA-ME19", owner: "Kwame Mensah", uses: 3, reward: "GHS 30", status: "pending" },
-  { id: 3, code: "EFU-BO07", owner: "Efua Boateng", uses: 12, reward: "GHS 120", status: "paid" },
-  { id: 4, code: "NAN-YW55", owner: "Nana Yaw", uses: 1, reward: "GHS 10", status: "pending" },
-  { id: 5, code: "ABE-SA31", owner: "Abena Sarpong", uses: 5, reward: "GHS 50", status: "active" },
-  { id: 6, code: "KOF-DA88", owner: "Kofi Darko", uses: 7, reward: "GHS 70", status: "active" },
-  { id: 7, code: "YAA-OW14", owner: "Yaa Owusu", uses: 14, reward: "GHS 140", status: "paid" },
-];
+const initialReferrals: Referral[] = [];
 
 export default function ReferralsPage() {
   const [currentPage, setCurrentPage] = useState(1);

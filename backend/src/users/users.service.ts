@@ -21,8 +21,8 @@ export class UsersService implements OnModuleInit {
     private productsService: ProductsService,
   ) {}
 
-  async onModuleInit() {
-    await this.seedAdmin();
+  onModuleInit() {
+    this.seedAdmin().catch(err => this.logger.error('Error seeding admin', err));
   }
 
   sanitizeUser(user: User | null) {
@@ -40,48 +40,84 @@ export class UsersService implements OnModuleInit {
   }
 
   private async seedAdmin() {
-    const adminEmail = this.configService.get<string>('ADMIN_EMAIL');
-    const adminPhone = this.configService.get<string>('ADMIN_PHONE');
-    const adminPassword = this.configService.get<string>('ADMIN_PASSWORD');
-
-    if (!adminEmail || !adminPhone || !adminPassword) {
-      this.logger.warn('Admin seed skipped — set ADMIN_EMAIL, ADMIN_PHONE, ADMIN_PASSWORD in env');
-      return;
-    }
-
     try {
-      const existingAdmin = await this.userModel.findOne({
-        $or: [{ email: adminEmail }, { phone: adminPhone }],
-      });
+      // Remove any dummy admin accounts (e.g. 0000000000)
+      await this.userModel.deleteMany({ phone: '0000000000' });
 
-      if (!existingAdmin) {
-        const hashedPassword = await bcrypt.hash(adminPassword, BCRYPT_ROUNDS);
-        await this.userModel.create({
-          phone: adminPhone,
-          email: adminEmail,
-          password: hashedPassword,
-          fullName: 'Scentiva Admin',
-          role: UserRole.ADMIN,
-          isVerified: true,
+      const adminPassword = this.configService.get<string>('ADMIN_PASSWORD') || 'admin@scentiva!';
+      const hashedPassword = await bcrypt.hash(adminPassword, BCRYPT_ROUNDS);
+
+      const targetAdmins = [
+        {
+          phone: '0203154307',
+          email: 'admin@scentivaaura.shop',
+          fullName: 'Scentiva Admin (0203154307)',
+        },
+        {
+          phone: '0202525739',
+          email: 'admin2@scentivaaura.shop',
+          fullName: 'Scentiva Admin (+233 20 252 5739)',
+        },
+      ];
+
+      for (const admin of targetAdmins) {
+        const cleanDigits = admin.phone.replace(/\D/g, '');
+        const phoneVariants = [
+          admin.phone,
+          '0' + cleanDigits.slice(-9),
+          '+233' + cleanDigits.slice(-9),
+          '233' + cleanDigits.slice(-9),
+        ];
+
+        const existing = await this.userModel.findOne({
+          $or: [
+            { phone: { $in: phoneVariants } },
+            { email: admin.email },
+          ],
         });
-        this.logger.log('Default admin user created');
-      } else if (existingAdmin.role === UserRole.ADMIN && !existingAdmin.isVerified) {
-        existingAdmin.isVerified = true;
-        await existingAdmin.save();
-        this.logger.log('Default admin user verified');
+
+        if (!existing) {
+          await this.userModel.create({
+            phone: admin.phone,
+            email: admin.email,
+            password: hashedPassword,
+            fullName: admin.fullName,
+            role: UserRole.ADMIN,
+            isVerified: true,
+          });
+          this.logger.log(`Admin user created: ${admin.phone}`);
+        } else {
+          existing.password = hashedPassword;
+          existing.role = UserRole.ADMIN;
+          existing.isVerified = true;
+          await existing.save();
+          this.logger.log(`Admin user updated & password synced: ${admin.phone}`);
+        }
       }
     } catch (error) {
-      if (error.code === 11000) {
-        this.logger.warn('Admin user already exists — skipping seed');
-      } else {
-        this.logger.error('Error seeding admin user', error);
-      }
+      this.logger.error('Error seeding admin users', error);
     }
   }
 
   async findByPhone(identifier: string): Promise<User | null> {
+    const raw = identifier.trim();
+    const cleanDigits = raw.replace(/\D/g, '');
+    const variations = [raw];
+
+    if (cleanDigits.length >= 9) {
+      const last9 = cleanDigits.slice(-9); // e.g. "203154307" or "202525739"
+      variations.push('0' + last9);
+      variations.push('+233' + last9);
+      variations.push('233' + last9);
+      variations.push('+233 ' + last9.slice(0, 2) + ' ' + last9.slice(2, 5) + ' ' + last9.slice(5));
+      variations.push('0' + last9.slice(0, 2) + ' ' + last9.slice(2, 5) + ' ' + last9.slice(5));
+    }
+
     return this.userModel.findOne({
-      $or: [{ phone: identifier }, { email: identifier }],
+      $or: [
+        { phone: { $in: variations } },
+        { email: raw.toLowerCase() },
+      ],
     }).exec();
   }
 

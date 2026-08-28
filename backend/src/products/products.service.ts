@@ -9,24 +9,27 @@ import { PRODUCT_SEED_DATA } from './product-seed.data';
 export class ProductsService implements OnModuleInit {
   constructor(@InjectModel(Product.name) private productModel: Model<Product>) {}
 
-  async onModuleInit() {
-    await this.seedProducts();
+  onModuleInit() {
+    this.seedProducts().catch(err => console.error('Error seeding products:', err));
   }
 
   async seedProducts(): Promise<void> {
     try {
-      for (const product of PRODUCT_SEED_DATA) {
-        await this.productModel.findOneAndUpdate(
-          { id: product.id },
-          {
-            ...product,
-            status: product.status ?? 'in-stock',
-            costPrice: product.costPrice ?? 0,
+      const operations = PRODUCT_SEED_DATA.map((product) => ({
+        updateOne: {
+          filter: { id: product.id },
+          update: {
+            $set: {
+              ...product,
+              status: product.status ?? 'in-stock',
+              costPrice: product.costPrice ?? 0,
+            },
           },
-          { upsert: true, new: true, setDefaultsOnInsert: true },
-        );
-      }
-      console.log(`✅ Seeded ${PRODUCT_SEED_DATA.length} products`);
+          upsert: true,
+        },
+      }));
+      await this.productModel.bulkWrite(operations);
+      console.log(`✅ Seeded ${PRODUCT_SEED_DATA.length} products in bulk`);
     } catch (error) {
       console.error('❌ Error seeding products:', error);
     }

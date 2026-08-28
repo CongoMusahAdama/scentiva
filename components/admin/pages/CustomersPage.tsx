@@ -18,35 +18,29 @@ interface Customer {
   totalSpent: string;
 }
 
-const initialCustomers: Customer[] = [
-  { id: 1, name: "Ama Asante", phone: "+233 55 123 4567", orders: 6, referralCode: "AMA-SA42", joined: "Jan 2026", totalSpent: "GHS 2,520" },
-  { id: 2, name: "Kwame Mensah", phone: "+233 24 987 6543", orders: 3, referralCode: "KWA-ME19", joined: "Feb 2026", totalSpent: "GHS 1,155" },
-  { id: 3, name: "Efua Boateng", phone: "+233 20 456 7890", orders: 8, referralCode: "EFU-BO07", joined: "Nov 2025", totalSpent: "GHS 3,290" },
-  { id: 4, name: "Nana Yaw", phone: "+233 50 112 2334", orders: 2, referralCode: "NAN-YW55", joined: "Mar 2026", totalSpent: "GHS 620" },
-  { id: 5, name: "Abena Sarpong", phone: "+233 27 765 4321", orders: 4, referralCode: "ABE-SA31", joined: "Dec 2025", totalSpent: "GHS 1,680" },
-  { id: 6, name: "Kofi Darko", phone: "+233 54 231 0987", orders: 5, referralCode: "KOF-DA88", joined: "Jan 2026", totalSpent: "GHS 2,100" },
-  { id: 7, name: "Yaa Owusu", phone: "+233 26 344 5566", orders: 9, referralCode: "YAA-OW14", joined: "Oct 2025", totalSpent: "GHS 4,050" },
-];
-
 export default function CustomersPage() {
-  const [customers, setCustomers] = useState<Customer[]>(initialCustomers);
+  const [customers, setCustomers] = useState<Customer[]>([]);
   const [search, setSearch] = useState("");
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const pageSize = 10;
 
-  useEffect(() => {
+  const loadCustomers = () => {
+    setLoading(true);
     CustomerService.getAll()
       .then((data) => {
-        if (data.length > 0) {
-          setCustomers(data);
-        }
+        setCustomers(Array.isArray(data) ? data : []);
         setLoading(false);
       })
       .catch((err) => {
         console.error("Failed to fetch live customers:", err);
+        setCustomers([]);
         setLoading(false);
       });
+  };
+
+  useEffect(() => {
+    loadCustomers();
   }, []);
 
   const handleDelete = async (id: number | string, name: string) => {

@@ -10,7 +10,7 @@ export declare class UsersService implements OnModuleInit {
     private productsService;
     private readonly logger;
     constructor(userModel: Model<User>, configService: ConfigService, productsService: ProductsService);
-    onModuleInit(): Promise<void>;
+    onModuleInit(): void;
     sanitizeUser(user: User | null): any;
     deleteAllCustomers(): Promise<number>;
     private seedAdmin;

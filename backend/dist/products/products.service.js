@@ -22,19 +22,26 @@ let ProductsService = class ProductsService {
     constructor(productModel) {
         this.productModel = productModel;
     }
-    async onModuleInit() {
-        await this.seedProducts();
+    onModuleInit() {
+        this.seedProducts().catch(err => console.error('Error seeding products:', err));
     }
     async seedProducts() {
         try {
-            for (const product of product_seed_data_1.PRODUCT_SEED_DATA) {
-                await this.productModel.findOneAndUpdate({ id: product.id }, {
-                    ...product,
-                    status: product.status ?? 'in-stock',
-                    costPrice: product.costPrice ?? 0,
-                }, { upsert: true, new: true, setDefaultsOnInsert: true });
-            }
-            console.log(`✅ Seeded ${product_seed_data_1.PRODUCT_SEED_DATA.length} products`);
+            const operations = product_seed_data_1.PRODUCT_SEED_DATA.map((product) => ({
+                updateOne: {
+                    filter: { id: product.id },
+                    update: {
+                        $set: {
+                            ...product,
+                            status: product.status ?? 'in-stock',
+                            costPrice: product.costPrice ?? 0,
+                        },
+                    },
+                    upsert: true,
+                },
+            }));
+            await this.productModel.bulkWrite(operations);
+            console.log(`✅ Seeded ${product_seed_data_1.PRODUCT_SEED_DATA.length} products in bulk`);
         }
         catch (error) {
             console.error('❌ Error seeding products:', error);

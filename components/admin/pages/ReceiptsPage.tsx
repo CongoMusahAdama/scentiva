@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Printer, Download, Search, CheckCircle2, FileText } from "lucide-react";
 import { AdminCard } from "@/components/admin/AdminCards";
 import { AdminButton, AdminInput, AdminSelect } from "@/components/admin/AdminUI";
-import { allProducts } from "@/lib/products";
+import { ProductService, Product } from "@/lib/services/product.service";
 import Image from "next/image";
 import { showSuccess, showError } from "@/lib/swal";
 import html2canvas from "html2canvas";
@@ -12,19 +12,36 @@ import jsPDF from "jspdf";
 import QRCode from "react-qr-code";
 
 export default function ReceiptsPage() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
+
   const [form, setForm] = useState({
     customerName: "",
     location: "",
-    productId: allProducts[0].id,
+    productId: "",
     paymentMethod: "M-Pesa / Mobile Money",
-    amount: allProducts[0].actual.toString(),
+    amount: "",
     receiptNumber: "SA-" + Math.floor(100000 + Math.random() * 900000),
     date: new Date().toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" }),
   });
 
   const [generated, setGenerated] = useState(false);
 
-  const selectedProduct = allProducts.find(p => p.id === form.productId) || allProducts[0];
+  useEffect(() => {
+    ProductService.getAllProducts().then(data => {
+      setProducts(data);
+      if (data.length > 0) {
+        setForm(prev => ({
+          ...prev,
+          productId: data[0].id as string,
+          amount: data[0].price.toString()
+        }));
+      }
+      setLoading(false);
+    });
+  }, []);
+
+  const selectedProduct = products.find(p => p.id === form.productId) || products[0];
 
   const handleGenerate = () => {
     if (!form.customerName) {
@@ -85,10 +102,10 @@ export default function ReceiptsPage() {
               label="Select Product"
               value={form.productId}
               onChange={(val) => {
-                const prod = allProducts.find(p => p.id === val);
-                setForm({ ...form, productId: val, amount: prod?.actual.toString() || "" });
+                const prod = products.find(p => p.id === val);
+                setForm({ ...form, productId: val, amount: prod?.price.toString() || "" });
               }}
-              options={allProducts.map(p => ({ value: p.id, label: p.name + " (GHS " + p.actual + ")" }))}
+              options={products.map(p => ({ value: p.id as string, label: p.name + " (GHS " + p.price + ")" }))}
             />
             <div className="grid grid-cols-2 gap-4">
               <AdminInput label="Amount (GHS)" value={form.amount} onChange={(val) => setForm({ ...form, amount: val })} />
@@ -189,8 +206,8 @@ export default function ReceiptsPage() {
                          <tbody style={{ borderBottom: "1px solid #E8E9EC" }}>
                             <tr>
                                <td style={{ padding: "20px 0" }}>
-                                  <p style={{ fontSize: "14px", color: "#1A1B23", fontWeight: 600 }}>{selectedProduct.name}</p>
-                                  <p style={{ fontSize: "11px", color: "#9CA3AF" }}>{selectedProduct.category.toUpperCase()} • {selectedProduct.tag}</p>
+                                  <p style={{ fontSize: "14px", color: "#1A1B23", fontWeight: 600 }}>{selectedProduct?.name || "Unknown Product"}</p>
+                                  <p style={{ fontSize: "11px", color: "#9CA3AF" }}>{selectedProduct?.category?.toUpperCase() || ""} • {selectedProduct?.brand || ""}</p>
                                </td>
                                <td align="right" style={{ padding: "20px 0" }}>
                                   <p style={{ fontSize: "14px", color: "#1A1B23", fontWeight: 700 }}>GHS {form.amount}</p>

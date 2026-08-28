@@ -3,7 +3,7 @@ import { CustomerDto } from './dto/customer.dto';
 export declare class CustomersController {
     private readonly customersService;
     constructor(customersService: CustomersService);
-    findAll(): Promise<import("./schemas/customer.schema").Customer[]>;
+    findAll(): Promise<any[]>;
     create(customerDto: CustomerDto): Promise<import("./schemas/customer.schema").Customer>;
-    delete(id: string): Promise<import("./schemas/customer.schema").Customer>;
+    delete(id: string): Promise<any>;
 }

@@ -24,7 +24,14 @@ export declare class AdminController {
                 value: number;
             }[];
         };
-        recentOrders: never[];
+        recentOrders: {
+            id: string;
+            customer: string;
+            product: string;
+            amount: string;
+            status: string;
+            date: string;
+        }[];
         alerts: {
             label: string;
             value: string;

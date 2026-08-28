@@ -50,10 +50,19 @@ function persistAuthSession(accessToken: string, authUser: User) {
 
 function redirectAfterAuth(router: ReturnType<typeof useRouter>, user: User, returnTo?: string) {
   if (user.role?.toUpperCase() === "ADMIN") {
-    router.push("/admin");
+    if (typeof window !== "undefined") {
+      window.location.href = "/admin";
+    } else {
+      router.push("/admin");
+    }
     return;
   }
-  router.push(safeReturnTo(returnTo) || "/dashboard");
+  const dest = safeReturnTo(returnTo) || "/dashboard";
+  if (typeof window !== "undefined") {
+    window.location.href = dest;
+  } else {
+    router.push(dest);
+  }
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {

@@ -25,6 +25,7 @@ import { SmsModule } from './sms/sms.module';
       imports: [ConfigModule],
       useFactory: async (configService: ConfigService) => ({
         uri: configService.get<string>('MONGODB_URI'),
+        serverSelectionTimeoutMS: 5000,
       }),
       inject: [ConfigService],
     }),

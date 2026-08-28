@@ -21,16 +21,6 @@ interface Order {
   address: string;
 }
 
-const initialOrders: Order[] = [
-  { id: "SA-1042", customer: "Ama Asante", products: "Oud Royale × 1", amount: "GHS 420", status: "paid", date: "Apr 20, 2026", phone: "+233 55 123 4567", address: "Accra, East Legon" },
-  { id: "SA-1041", customer: "Kwame Mensah", products: "Velvet Noir × 2", amount: "GHS 720", status: "pending", date: "Apr 20, 2026", phone: "+233 24 987 6543", address: "Kumasi, Adum" },
-  { id: "SA-1040", customer: "Efua Boateng", products: "Citrus Bloom × 1", amount: "GHS 295", status: "delivered", date: "Apr 19, 2026", phone: "+233 20 456 7890", address: "Tema, Community 5" },
-  { id: "SA-1039", customer: "Nana Yaw", products: "Amber Mist × 1", amount: "GHS 310", status: "delivered", date: "Apr 19, 2026", phone: "+233 50 112 2334", address: "Cape Coast" },
-  { id: "SA-1038", customer: "Abena Sarpong", products: "Oud Royale × 1", amount: "GHS 420", status: "pending", date: "Apr 18, 2026", phone: "+233 27 765 4321", address: "Takoradi" },
-  { id: "SA-1037", customer: "Kofi Darko", products: "Velvet Noir × 1, Citrus Bloom × 1", amount: "GHS 655", status: "paid", date: "Apr 17, 2026", phone: "+233 54 231 0987", address: "Accra, Cantonments" },
-  { id: "SA-1036", customer: "Yaa Owusu", products: "Amber Mist × 2", amount: "GHS 620", status: "delivered", date: "Apr 16, 2026", phone: "+233 26 344 5566", address: "Accra, Osu" },
-];
-
 const statusOptions: { value: string; label: string }[] = [
   { value: "pending", label: "Pending" },
   { value: "paid", label: "Paid" },
@@ -38,23 +28,28 @@ const statusOptions: { value: string; label: string }[] = [
 ];
 
 export default function OrdersPage() {
-  const [orders, setOrders] = useState<Order[]>(initialOrders);
+  const [orders, setOrders] = useState<Order[]>([]);
   const [detail, setDetail] = useState<Order | null>(null);
   const [filter, setFilter] = useState<"all" | OrderStatus>("all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  const loadOrders = () => {
+    setLoading(true);
+    OrderService.fetchAll()
+      .then((data: any[]) => {
+        setOrders(Array.isArray(data) ? data : []);
+        setLoading(false);
+      })
+      .catch((err) => {
+        console.error("Failed to fetch live orders:", err);
+        setOrders([]);
+        setLoading(false);
+      });
+  };
 
   useEffect(() => {
-    OrderService.fetchAll().then((data: any[]) => {
-      // Merge DB orders that aren't already in the mock list
-      const newDbOrders = data.filter(dbO => !initialOrders.find(io => io.id === dbO.id));
-      if (newDbOrders.length > 0) {
-        setOrders(prev => {
-          const combined = [...newDbOrders.reverse(), ...prev];
-          // Filter duplicates in case of hot-reload
-          return combined.filter((v, i, a) => a.findIndex(t => t.id === v.id) === i);
-        });
-      }
-    });
+    loadOrders();
   }, []);
 
   const filtered = orders.filter((o) => {
@@ -218,6 +213,13 @@ export default function OrdersPage() {
         pageSize={pageSize}
         onPageChange={setCurrentPage}
       />
+      {filtered.length === 0 && (
+        <div className="text-center py-10">
+          <p style={{ fontSize: "13px", color: "#6B7280", fontFamily: "var(--font-poppins, sans-serif)" }}>
+            No orders found. New customer orders will appear here in real-time.
+          </p>
+        </div>
+      )}
       </AdminCard>
 
       {/* Order Detail Modal */}

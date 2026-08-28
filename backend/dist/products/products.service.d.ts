@@ -5,7 +5,7 @@ import { CreateProductDto, UpdateProductDto } from './dto/product.dto';
 export declare class ProductsService implements OnModuleInit {
     private productModel;
     constructor(productModel: Model<Product>);
-    onModuleInit(): Promise<void>;
+    onModuleInit(): void;
     seedProducts(): Promise<void>;
     create(createProductDto: CreateProductDto): Promise<Product>;
     findAll(): Promise<Product[]>;
