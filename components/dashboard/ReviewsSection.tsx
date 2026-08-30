@@ -4,13 +4,14 @@ import React, { useState, useEffect } from "react";
 import Image from "next/image";
 import { Star, Send, CheckCircle2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
-import { allProducts } from "@/lib/products";
+import { useProducts } from "@/lib/hooks/useProducts";
 
 import { useAuth } from "@/context/AuthContext";
 import { ReviewService, Review } from "@/lib/services/review.service";
 
 export default function ReviewsSection() {
   const { user } = useAuth();
+  const { products: allProducts } = useProducts();
   const [selectedProduct, setSelectedProduct] = useState("");
   const [rating, setRating] = useState(0);
   const [comment, setComment] = useState("");

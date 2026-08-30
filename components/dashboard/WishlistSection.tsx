@@ -3,7 +3,6 @@
 import React from "react";
 import Image from "next/image";
 import { ShoppingBag, Eye, Trash2 } from "lucide-react";
-import { allProducts } from "@/lib/products";
 import { useCart } from "@/context/CartContext";
 
 import { WishlistService } from "@/lib/services/wishlist.service";

@@ -17,7 +17,6 @@ import {
   AdminTableRow,
   AdminTableCell,
 } from "@/components/admin/AdminUI";
-import { allProducts } from "@/lib/products";
 import { showSuccess, showError, showConfirm } from "@/lib/swal";
 import { ProductService } from "@/lib/services/product.service";
 
@@ -49,26 +48,31 @@ const emptyForm: Omit<Product, "id"> = {
 
 const categories = ["mens", "womens", "unisex", "gift"];
 
-export default function ProductsPage() {
-  const [products, setProducts] = useState<Product[]>(allProducts.map(p => ({
+function mapDbProduct(p: any): Product {
+  return {
     id: p.id,
     name: p.name,
     price: p.original ? p.original.toString() : p.actual.toString(),
-    costPrice: (p as any).costPrice || 0,
-    discount: p.original ? Math.round(((p.original - p.actual) / p.original) * 100) : 0,
+    costPrice: p.costPrice || 0,
+    discount: p.original && p.original > p.actual ? Math.round(((p.original - p.actual) / p.original) * 100) : 0,
     category: p.category,
-    scentType: p.tag.split(" ")[0].replace("'", ""),
+    scentType: p.tag ? p.tag.split(" ")[0].replace("'", "") : "",
     bestFor: p.perfectOccasion,
     stock: 12,
     image: p.image,
-    image2: (p as any).image2 || "",
+    image2: p.image2 || "",
     description: p.desc,
     whenToWear: p.whenToApply?.[0]?.label || "Daily",
-    whyChoose: p.pros[0] || "",
-    pros: p.pros,
-    cons: p.cons,
-    status: "in-stock",
-  })));
+    whyChoose: p.pros?.[0] || "",
+    pros: p.pros || [],
+    cons: p.cons || [],
+    status: (p.status as any) || "in-stock",
+  };
+}
+
+export default function ProductsPage() {
+  const [products, setProducts] = useState<Product[]>([]);
+  const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<Product | null>(null);
   const [form, setForm] = useState<Omit<Product, "id">>(emptyForm);
@@ -79,32 +83,9 @@ export default function ProductsPage() {
 
   useEffect(() => {
     ProductService.fetchAll().then((data: any[]) => {
-      // Merge DB products that aren't already in the mock list
-      const newDbProducts = data.filter(dbP => !allProducts.find(ap => ap.id === dbP.id));
-      if (newDbProducts.length > 0) {
-        allProducts.unshift(...newDbProducts.reverse());
-          
-          setProducts(allProducts.map(p => ({
-            id: p.id,
-            name: p.name,
-            price: p.original ? p.original.toString() : p.actual.toString(),
-            costPrice: (p as any).costPrice || 0,
-            discount: p.original && p.original > p.actual ? Math.round(((p.original - p.actual) / p.original) * 100) : 0,
-            category: p.category,
-            scentType: p.tag ? p.tag.split(" ")[0].replace("'", "") : "",
-            bestFor: p.perfectOccasion,
-            stock: 12,
-            image: p.image,
-            image2: (p as any).image2 || "",
-            description: p.desc,
-            whenToWear: p.whenToApply?.[0]?.label || "Daily",
-            whyChoose: p.pros?.[0] || "",
-            pros: p.pros || [],
-            cons: p.cons || [],
-            status: (p.status as any) || "in-stock",
-          })));
-        }
-      });
+      setProducts(data.map(mapDbProduct));
+      setLoading(false);
+    });
   }, []);
 
   const openAdd = () => {
@@ -133,44 +114,37 @@ export default function ProductsPage() {
       return;
     }
 
+    const actualPrice = form.discount ? Math.round(Number(form.price) * (1 - form.discount / 100)) : Number(form.price);
+
     if (editTarget) {
-      setProducts((prev) => prev.map((p) => (p.id === editTarget.id ? { ...form, id: editTarget.id } : p)));
-      
-      // Mutate global array for the frontend
-      const idx = allProducts.findIndex(p => p.id === editTarget.id);
-      if (idx !== -1) {
-        const actualPrice = form.discount ? Math.round(Number(form.price) * (1 - form.discount / 100)) : Number(form.price);
-        
-        allProducts[idx] = { 
-          ...allProducts[idx], 
-          name: form.name, 
-          actual: actualPrice,
-          original: Number(form.price),
-          tag: `${form.scentType} ${form.category}`,
-          category: form.category,
-          image: form.image,
-          ...(form.image2 && { image2: form.image2 }),
-          desc: form.description,
-          pros: form.pros.length ? form.pros : (form.whyChoose ? [form.whyChoose] : []),
-          cons: form.cons,
-          whenToApply: form.whenToWear ? [{ icon: "Clock", label: form.whenToWear, detail: "Recommended" }] : [],
-          perfectOccasion: form.bestFor,
-          status: form.status as "in-stock" | "sold-out"
-        };
-        
-        // Save to Live Backend
-        ProductService.update(editTarget.id.toString(), allProducts[idx])
-          .catch(err => console.error("Failed to update in DB:", err));
-      }
-      
-      showSuccess("Product Updated", `${form.name} has been successfully updated.`);
+      const updatedProduct = {
+        name: form.name,
+        actual: actualPrice,
+        original: Number(form.price),
+        costPrice: form.costPrice,
+        tag: `${form.scentType} ${form.category}`,
+        category: form.category,
+        image: form.image,
+        ...(form.image2 && { image2: form.image2 }),
+        desc: form.description,
+        pros: form.pros.length ? form.pros : (form.whyChoose ? [form.whyChoose] : []),
+        cons: form.cons,
+        whenToApply: form.whenToWear ? [{ icon: "Clock", label: form.whenToWear, detail: "Recommended" }] : [],
+        perfectOccasion: form.bestFor,
+        status: form.status,
+      };
+
+      ProductService.update(editTarget.id.toString(), updatedProduct)
+        .then(() => {
+          setProducts((prev) => prev.map((p) => (p.id === editTarget.id ? { ...form, id: editTarget.id } : p)));
+          showSuccess("Product Updated", `${form.name} has been successfully updated.`);
+        })
+        .catch((err) => {
+          console.error("Failed to update in DB:", err);
+          showError("Update Failed", "Could not save changes. Please try again.");
+        });
     } else {
       const newId = `SA-NEW-${Date.now()}`;
-      setProducts((prev) => [{ ...form, id: newId } as Product, ...prev]);
-      
-      const actualPrice = form.discount ? Math.round(Number(form.price) * (1 - form.discount / 100)) : Number(form.price);
-
-      // Mutate global array for the frontend
       const newProd = {
         id: newId,
         name: form.name,
@@ -186,16 +160,18 @@ export default function ProductsPage() {
         cons: form.cons,
         whenToApply: form.whenToWear ? [{ icon: "Clock", label: form.whenToWear, detail: "Recommended" }] : [],
         perfectOccasion: form.bestFor,
-        status: form.status as "in-stock" | "sold-out",
+        status: form.status,
       };
 
-      allProducts.unshift(newProd as any);
-
-      // Save to Live Backend
       ProductService.create(newProd)
-        .catch(err => console.error("Failed to save to DB:", err));
-
-      showSuccess("Product Added", `${form.name} has been added to inventory.`);
+        .then(() => {
+          setProducts((prev) => [{ ...form, id: newId } as Product, ...prev]);
+          showSuccess("Product Added", `${form.name} has been added to inventory.`);
+        })
+        .catch((err) => {
+          console.error("Failed to save to DB:", err);
+          showError("Add Failed", "Could not add product. Please try again.");
+        });
     }
     setModalOpen(false);
   };
@@ -208,19 +184,15 @@ export default function ProductsPage() {
     );
 
     if (result.isConfirmed) {
-      setProducts((prev) => prev.filter((p) => p.id !== id));
-      
-      // Mutate global array for the frontend
-      const idx = allProducts.findIndex(p => p.id === id);
-      if (idx !== -1) {
-        allProducts.splice(idx, 1);
-      }
-
-      // Delete from Live Backend
       ProductService.delete(id.toString())
-        .catch(err => console.error("Failed to delete from DB:", err));
-
-      showSuccess("Deleted", "Product has been removed.");
+        .then(() => {
+          setProducts((prev) => prev.filter((p) => p.id !== id));
+          showSuccess("Deleted", "Product has been removed.");
+        })
+        .catch((err) => {
+          console.error("Failed to delete from DB:", err);
+          showError("Delete Failed", "Could not delete product. Please try again.");
+        });
     }
   };
 
@@ -236,20 +208,19 @@ export default function ProductsPage() {
       if (!result.isConfirmed) return;
     }
 
-    setProducts((prev) => prev.map((p) => 
-      p.id === id ? { ...p, status: newStatus } : p
-    ));
-
-    // Mutate global array for the frontend
-    const idx = allProducts.findIndex(p => p.id === id);
-    if (idx !== -1) {
-      allProducts[idx].status = newStatus as "in-stock" | "sold-out";
+    try {
+      await ProductService.update(id.toString(), { status: newStatus });
+      setProducts((prev) => prev.map((p) =>
+        p.id === id ? { ...p, status: newStatus } : p
+      ));
+      showSuccess(
+        newStatus === "sold-out" ? "Marked as Sold Out" : "Restocked",
+        `${name} is now ${newStatus === "sold-out" ? "unavailable" : "back in stock"}.`
+      );
+    } catch (err) {
+      console.error("Failed to update status in DB:", err);
+      showError("Update Failed", "Could not update stock status. Please try again.");
     }
-
-    showSuccess(
-      newStatus === "sold-out" ? "Marked as Sold Out" : "Restocked",
-      `${name} is now ${newStatus === "sold-out" ? "unavailable" : "back in stock"}.`
-    );
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>, field: "image" | "image2") => {

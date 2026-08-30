@@ -4,7 +4,8 @@ import { useState, useEffect } from "react";
 import { Printer, Download, Search, CheckCircle2, FileText } from "lucide-react";
 import { AdminCard } from "@/components/admin/AdminCards";
 import { AdminButton, AdminInput, AdminSelect } from "@/components/admin/AdminUI";
-import { ProductService, Product } from "@/lib/services/product.service";
+import { ProductService } from "@/lib/services/product.service";
+import type { Product } from "@/lib/types/product";
 import Image from "next/image";
 import { showSuccess, showError } from "@/lib/swal";
 import html2canvas from "html2canvas";
@@ -28,13 +29,13 @@ export default function ReceiptsPage() {
   const [generated, setGenerated] = useState(false);
 
   useEffect(() => {
-    ProductService.getAllProducts().then(data => {
+    ProductService.fetchAll().then((data: Product[]) => {
       setProducts(data);
       if (data.length > 0) {
         setForm(prev => ({
           ...prev,
-          productId: data[0].id as string,
-          amount: data[0].price.toString()
+          productId: data[0].id,
+          amount: data[0].actual.toString()
         }));
       }
       setLoading(false);
@@ -103,9 +104,9 @@ export default function ReceiptsPage() {
               value={form.productId}
               onChange={(val) => {
                 const prod = products.find(p => p.id === val);
-                setForm({ ...form, productId: val, amount: prod?.price.toString() || "" });
+                setForm({ ...form, productId: val, amount: prod?.actual.toString() || "" });
               }}
-              options={products.map(p => ({ value: p.id as string, label: p.name + " (GHS " + p.price + ")" }))}
+              options={products.map(p => ({ value: p.id, label: p.name + " (GHS " + p.actual + ")" }))}
             />
             <div className="grid grid-cols-2 gap-4">
               <AdminInput label="Amount (GHS)" value={form.amount} onChange={(val) => setForm({ ...form, amount: val })} />
@@ -207,7 +208,7 @@ export default function ReceiptsPage() {
                             <tr>
                                <td style={{ padding: "20px 0" }}>
                                   <p style={{ fontSize: "14px", color: "#1A1B23", fontWeight: 600 }}>{selectedProduct?.name || "Unknown Product"}</p>
-                                  <p style={{ fontSize: "11px", color: "#9CA3AF" }}>{selectedProduct?.category?.toUpperCase() || ""} • {selectedProduct?.brand || ""}</p>
+                                  <p style={{ fontSize: "11px", color: "#9CA3AF" }}>{selectedProduct?.category?.toUpperCase() || ""} • {selectedProduct?.tag || ""}</p>
                                </td>
                                <td align="right" style={{ padding: "20px 0" }}>
                                   <p style={{ fontSize: "14px", color: "#1A1B23", fontWeight: 700 }}>GHS {form.amount}</p>

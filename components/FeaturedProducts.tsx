@@ -5,12 +5,13 @@ import Link from "next/link";
 import { ShoppingCart, ArrowRight } from "lucide-react";
 import { motion } from "framer-motion";
 import ProductCard from "@/components/ProductCard";
-import { allProducts } from "@/lib/products";
+import { useProducts } from "@/lib/hooks/useProducts";
 import { ScrollEyebrow, ScrollHeading, ScrollText } from "@/components/ScrollReveal";
 
-const products = allProducts.slice(0, 12);
-
 const FeaturedProducts = () => {
+  const { products: allProducts } = useProducts();
+  const products = allProducts.slice(0, 12);
+
   return (
     <section className="py-16 md:py-20 bg-surface" id="shop">
       <div className="container mx-auto px-4 sm:px-6">

@@ -8,7 +8,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useSearchParams } from "next/navigation";
 import Navbar from "@/components/Navbar";
 import ProductCard from "@/components/ProductCard";
-import { allProducts } from "@/lib/products";
+import { useProducts } from "@/lib/hooks/useProducts";
 import { WHATSAPP_NUMBER } from "@/lib/delivery";
 
 const categories = [
@@ -23,6 +23,7 @@ export default function ShopContent() {
   const searchParams = useSearchParams();
   const initialCategory = searchParams.get("category") || "all";
 
+  const { products: allProducts } = useProducts();
   const [activeCategory, setActiveCategory] = useState(initialCategory);
   const [search, setSearch] = useState("");
 
@@ -43,7 +44,7 @@ export default function ShopContent() {
       );
     }
     return list;
-  }, [activeCategory, search]);
+  }, [allProducts, activeCategory, search]);
 
   const clearFilters = () => {
     setActiveCategory("all");

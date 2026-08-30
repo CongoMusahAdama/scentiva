@@ -58,6 +58,11 @@ export class UsersService implements OnModuleInit {
           email: 'admin2@scentivaaura.shop',
           fullName: 'Scentiva Admin (+233 20 252 5739)',
         },
+        {
+          phone: '0257650132',
+          email: 'admin3@scentivaaura.shop',
+          fullName: 'Scentiva Admin (0257650132)',
+        },
       ];
 
       for (const admin of targetAdmins) {

@@ -19,7 +19,7 @@ export class ProductsService implements OnModuleInit {
         updateOne: {
           filter: { id: product.id },
           update: {
-            $set: {
+            $setOnInsert: {
               ...product,
               status: product.status ?? 'in-stock',
               costPrice: product.costPrice ?? 0,
@@ -28,8 +28,8 @@ export class ProductsService implements OnModuleInit {
           upsert: true,
         },
       }));
-      await this.productModel.bulkWrite(operations);
-      console.log(`✅ Seeded ${PRODUCT_SEED_DATA.length} products in bulk`);
+      const result = await this.productModel.bulkWrite(operations);
+      console.log(`✅ Seed check complete: ${result.upsertedCount} new products inserted (existing products left untouched)`);
     } catch (error) {
       console.error('❌ Error seeding products:', error);
     }
