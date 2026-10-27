@@ -44,7 +44,7 @@ const ProductCard = ({ product, className = "" }: ProductCardProps) => {
 
         {/* Desktop hover — View Details */}
         <div className="absolute inset-0 hidden md:flex items-end justify-center p-4 bg-surface/0 group-hover:bg-surface/30 transition-colors duration-300">
-          <span className="w-full text-center bg-elevated text-deep-noir border border-parchment/10 py-3 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
+          <span className="w-full text-center bg-elevated text-parchment border border-parchment/10 py-3 opacity-0 translate-y-2 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
             View Details
           </span>
         </div>

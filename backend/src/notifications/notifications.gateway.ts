@@ -19,7 +19,7 @@ import { Logger } from '@nestjs/common';
       'http://localhost:3002',
       'http://localhost:3003',
       /^http:\/\/(localhost|127\.0\.0\.1)(:\d+)?$/,
-      /\.netlify\.app$/,
+      /\.vercel\.app$/,
     ].filter(Boolean),
     credentials: true,
   },

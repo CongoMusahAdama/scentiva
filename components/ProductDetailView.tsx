@@ -129,7 +129,7 @@ const ProductDetailView = ({ product }: Props) => {
               <button
                 type="button"
                 onClick={handleWishlist}
-                className="absolute -top-1 -right-1 lg:top-0 lg:right-0 w-8 h-8 bg-elevated text-deep-noir flex items-center justify-center hover:bg-deep-noir hover:text-surface transition-colors"
+                className="absolute -top-1 -right-1 lg:top-0 lg:right-0 w-8 h-8 bg-elevated text-parchment flex items-center justify-center hover:bg-parchment hover:text-surface transition-colors"
                 aria-label="Add to wishlist"
               >
                 <Heart size={14} fill={isWishlisted ? "currentColor" : "none"} />

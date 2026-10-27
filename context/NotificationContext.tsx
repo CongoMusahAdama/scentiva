@@ -15,12 +15,12 @@ export const NotificationProvider = ({ children }: { children: ReactNode }) => {
   const { user, token } = useAuth();
   const [socket, setSocket] = useState<Socket | null>(null);
 
-  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://127.0.0.1:3001";
-  // Remove http/https and trailing slash for socket.io
-  const socketUrl = API_URL.replace(/\/$/, "");
+  // Realtime needs a long-running server; the Vercel API can't hold WebSockets,
+  // so the socket only connects when a dedicated NEXT_PUBLIC_SOCKET_URL is set.
+  const socketUrl = (process.env.NEXT_PUBLIC_SOCKET_URL || "").replace(/\/$/, "");
 
   useEffect(() => {
-    if (!token) return;
+    if (!token || !socketUrl) return;
 
     const newSocket = io(socketUrl, {
       auth: { token },
